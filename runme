@@ -1,0 +1,29 @@
+#!/bin/bash
+
+
+RUNNAME="$1"
+SCALE="$2"
+FLOW="$3"
+PROJECT="bif112"
+
+if [ "$#" -lt 2 ]
+then
+  echo "Must provide arguments [runname] [nreplicates] [datasize]"
+  exit 1
+fi
+
+LAYFACTOR="42"
+TESTHOME="/gpfs/alpine/bif112/proj-shared/nopaw"
+NNODES=$(( 1 + ( SCALE / LAYFACTOR ) + ( SCALE % LAYFACTOR > 0 ) ))
+
+SHPROFILE="$TESTHOME/rt.bashrc"
+JOBHOME="$TESTHOME/sessions/$RUNNAME"
+DBLOCATION="$JOBHOME/mongo"
+
+mkdir -p $JOBHOME
+mkdir -p $DBLOCATION
+
+submitcommand="bsub -o sessions/$RUNNAME/nopaw.out -e sessions/$RUNNAME/nopaw.err -J $RUNNAME -nnodes $NNODES -W 20 -P $PROJECT -env \"all, SHPROFILE=$SHPROFILE, ARGS=$JOBHOME*$DBLOCATION*$LAYFACTOR*$SCALE\" lib/jobscript.lsf"
+
+echo $submitcommand
+eval $submitcommand

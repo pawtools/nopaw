@@ -1,0 +1,75 @@
+#!/bin/bash
+
+source $SHPROFILE
+
+echo "JOB got inputs:"
+echo "Shell Profile RC: $SHPROFILE"
+echo "Job Script Args: $ARGS"
+AARGS=(`echo $ARGS | tr '*' ' '`)
+echo "Args as Array: ${AARGS[@]}"
+JOBHOME="${AARGS[0]}"
+DBLOCATION="${AARGS[1]}"
+LAYFACTOR="${AARGS[2]}"
+NEXECUTORS="${AARGS[3]}"
+NETDEVICE="ib0"
+
+cd $JOBHOME
+export OMP_NUM_THREADS=$(( 42 / $LAYFACTOR ))
+export RS_PER_HOST="$LAYFACTOR"
+
+# "LSB_HOSTS" is (erroneously?) empty with all jobs but
+# the tiniest ones on summit, have to use "LSB_MCPU_HOSTS"
+#echo $LSB_HOSTS | tr ' ' '\n' | sort -u | wc -l
+NNODES=$(echo "`echo $LSB_MCPU_HOSTS | tr ' ' '\n' | sort -u | wc -l` - 3" | bc)
+
+# minus 1 since 1 node for database
+#NEXECUTORS=$(( ($NNODES-1) * $LAYFACTOR))
+
+echo "NNODES: $NNODES"
+echo "NEXECUTORS: $NEXECUTORS"
+echo "Job in directory:"
+echo `pwd`
+echo "Database Location: $DBLOCATION"
+
+#####----------------------------------------------#####
+###--          MongoDB Ghost Setup                 --###
+#####----------------------------------------------#####
+mongoghostlaunch="jsrun --exit_on_error 1 --nrs 1 --rs_per_host 1 --tasks_per_rs 1 --cpu_per_rs 42 --bind packed:42 --launch_distribution plane:1 db-ghost-writer.bash $NETDEVICE $DBLOCATION"
+echo $mongoghostlaunch
+eval $mongoghostlaunch 2> nopaw.mongodb.ghost.err 1> nopaw.mongodb.ghost.out & MONGO_GPID=$!
+# Must wait for mongo node to write hostname and start up
+sleep 15
+REMOTEHOST=$(cat $DBLOCATION/hostname.txt)
+
+#####----------------------------------------------#####
+###--          MongoDB SSH Launcher                --###
+#####----------------------------------------------#####
+echo "Database top:"
+ls -grth $DBLOCATION
+REMOTEPORT="27017"
+export DBURL="mongodb://$REMOTEHOST:$REMOTEPORT/"
+echo "MongoDB URL: $DBURL"
+mongosshlaunch="ssh-and-launch.expect $SHPROFILE $REMOTEHOST launch_amongod $DBLOCATION $REMOTEPORT"
+eval $mongosshlaunch 2> nopaw.mongodb.sshlaunch.err 1> nopaw.mongodb.sshlaunch.out & MONGO_APID=$!
+sleep 20
+#------------------------------------------------------#
+executorlaunch="jsrun --exit_on_error 1 --nrs $NEXECUTORS --tasks_per_rs 1 --cpu_per_rs $OMP_NUM_THREADS --bind packed:$OMP_NUM_THREADS --launch_distribution plane:1 --smpiargs off db-connector.bash"
+echo $executorlaunch
+eval $executorlaunch 2> nopaw.executor.launch.err 1> nopaw.executor.launch.out & EXEC_APID=$!
+
+#####----------------------------------------------#####
+###--           Finishing Up Now                   --###
+#####----------------------------------------------#####
+wait $EXEC_APID
+
+echo "Going to shut down the database, event is finished"
+kill "$MONGO_APID"
+wait "$MONGO_APID"
+kill "$MONGO_GPID"
+wait "$MONGO_GPID"
+rm $DBLOCATION/hostname.txt
+
+# Sometimes job doesn't die nicely...
+echo "I'm depressed, killing myself!"
+echo "bkill $LSB_JOBID"
+bkill $LSB_JOBID
