@@ -1,9 +1,15 @@
 #!/bin/bash
 
-MYID="$OMPI_COMM_WORLD_RANK"
-MYLOG="nopaw.executor.$MYID.out"
+DBHOST="$1"
+DBPORT="$2"
 
-echo "I'm a connector" >> $MYLOG
-echo "a connector starts `date +%Y/%m/%d-%H:%M:%S.%5N`" >> $MYLOG
+MYID="$OMPI_COMM_WORLD_RANK"
+MYCONNLOG="executors/nopaw.connector.$MYID.out"
+MYEXECLOG="executors/nopaw.executor.$MYID.out"
+
+echo "I'm a connector" >> $MYCONNLOG
+echo "a connector starts `date +%Y/%m/%d-%H:%M:%S.%5N`" >> $MYCONNLOG
+#mongo-sync.expect "read $DBHOST $DBPORT testdb"
+mongo-sync.py "read" "$DBHOST" "$DBPORT" "testdb" >> $MYEXECLOG
 sleep 60
-echo "a connector stops `date +%Y/%m/%d-%H:%M:%S.%5N`" >> $MYLOG
+echo "a connector stops `date +%Y/%m/%d-%H:%M:%S.%5N`" >> $MYCONNLOG

@@ -42,7 +42,7 @@ sleep 15
 REMOTEHOST=$(cat $DBLOCATION/hostname.txt)
 
 #####----------------------------------------------#####
-###--          MongoDB SSH Launcher                --###
+###--          mongodb ssh launcher                --###
 #####----------------------------------------------#####
 echo "Database top:"
 ls -grth $DBLOCATION
@@ -52,10 +52,13 @@ echo "MongoDB URL: $DBURL"
 mongosshlaunch="ssh-and-launch.expect $SHPROFILE $REMOTEHOST launch_amongod $DBLOCATION $REMOTEPORT"
 eval $mongosshlaunch 2> nopaw.mongodb.sshlaunch.err 1> nopaw.mongodb.sshlaunch.out & MONGO_APID=$!
 sleep 20
-#------------------------------------------------------#
-executorlaunch="jsrun --exit_on_error 1 --nrs $NEXECUTORS --tasks_per_rs 1 --cpu_per_rs $OMP_NUM_THREADS --bind packed:$OMP_NUM_THREADS --launch_distribution plane:1 --smpiargs off db-connector.bash"
+
+#####----------------------------------------------#####
+###--           Executor Launcher                  --###
+#####----------------------------------------------#####
+executorlaunch="jsrun --exit_on_error 1 --nrs $NEXECUTORS --tasks_per_rs 1 --cpu_per_rs $OMP_NUM_THREADS --bind packed:$OMP_NUM_THREADS --launch_distribution plane:1 --smpiargs off db-connector.bash $REMOTEHOST $REMOTEPORT"
 echo $executorlaunch
-eval $executorlaunch 2> nopaw.executor.launch.err 1> nopaw.executor.launch.out & EXEC_APID=$!
+eval $executorlaunch 2> executors/nopaw.executor.launch.err 1> executors/nopaw.executor.launch.out & EXEC_APID=$!
 
 #####----------------------------------------------#####
 ###--           Finishing Up Now                   --###

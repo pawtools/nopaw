@@ -11,9 +11,16 @@ set DBPORT [lindex $argv 4];
 
 spawn ssh "$SSHHOST"
 
-expect "Are you sure you want to continue connecting (yes/no)?" { send "yes\r" }
+expect {
+    -- "-bash-"
+    { send "pwd\r" }
+
+    "Are you sure you want to continue connecting (yes/no)?"
+    { send "yes\r" }
+}
+
 #expect -- "-bash-" { send "cd $WORKDIR\r" }
-expect -- "-bash-" { send "ulimit -u 32000" }
+expect -- "-bash-" { send "ulimit -u 32000\r" }
 expect -- "-bash-" { send "source $SHPROFILE\r" }
 expect -- "-bash-" { send "$SSHEXEC $DBLOCATION $DBPORT --launch\r" }
 #expect -- "-bash-" { send "sleep 10\r" }

@@ -20,8 +20,9 @@ SHPROFILE="$TESTHOME/rt.bashrc"
 JOBHOME="$TESTHOME/sessions/$RUNNAME"
 DBLOCATION="$JOBHOME/mongo"
 
-mkdir -p $JOBHOME
-mkdir -p $DBLOCATION
+mkdir -p "$JOBHOME"
+mkdir -p "$DBLOCATION"
+mkdir -p "$JOBHOME/executors"
 
 submitcommand="bsub -o sessions/$RUNNAME/nopaw.out -e sessions/$RUNNAME/nopaw.err -J $RUNNAME -nnodes $NNODES -W 20 -P $PROJECT -env \"all, SHPROFILE=$SHPROFILE, ARGS=$JOBHOME*$DBLOCATION*$LAYFACTOR*$SCALE\" lib/jobscript.lsf"
 
