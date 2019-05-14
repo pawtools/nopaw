@@ -11,6 +11,11 @@ JOBHOME="${AARGS[0]}"
 DBLOCATION="${AARGS[1]}"
 LAYFACTOR="${AARGS[2]}"
 NEXECUTORS="${AARGS[3]}"
+#DBNAME="${AARGS[4]}"
+DBNAME="testdb"
+RUNNAME="${AARGS[4]}"
+OPERATION="${AARGS[5]}"
+#OPERATION="read"
 NETDEVICE="ib0"
 
 cd $JOBHOME
@@ -22,14 +27,16 @@ export RS_PER_HOST="$LAYFACTOR"
 #echo $LSB_HOSTS | tr ' ' '\n' | sort -u | wc -l
 NNODES=$(echo "`echo $LSB_MCPU_HOSTS | tr ' ' '\n' | sort -u | wc -l` - 3" | bc)
 
-# minus 1 since 1 node for database
-#NEXECUTORS=$(( ($NNODES-1) * $LAYFACTOR))
-
 echo "NNODES: $NNODES"
 echo "NEXECUTORS: $NEXECUTORS"
 echo "Job in directory:"
 echo `pwd`
 echo "Database Location: $DBLOCATION"
+echo ""
+echo "Doing '$OPERATION' operations"
+echo "New run's name is: '$RUNNAME'"
+echo ""
+echo ""
 
 #####----------------------------------------------#####
 ###--          MongoDB Ghost Setup                 --###
@@ -46,28 +53,61 @@ REMOTEHOST=$(cat $DBLOCATION/hostname.txt)
 #####----------------------------------------------#####
 echo "Database top:"
 ls -grth $DBLOCATION
+#VERBOSE="-vvvv"
+VERBOSE=""
 REMOTEPORT="27017"
 export DBURL="mongodb://$REMOTEHOST:$REMOTEPORT/"
 echo "MongoDB URL: $DBURL"
-mongosshlaunch="ssh-and-launch.expect $SHPROFILE $REMOTEHOST launch_amongod $DBLOCATION $REMOTEPORT"
+mongosshlaunch="ssh-and-launch.expect $SHPROFILE $REMOTEHOST launch_amongod $DBLOCATION $REMOTEPORT $VERBOSE"
 eval $mongosshlaunch 2> nopaw.mongodb.sshlaunch.err 1> nopaw.mongodb.sshlaunch.out & MONGO_APID=$!
 sleep 20
 
 #####----------------------------------------------#####
+###--         Initialize the MongoDB               --###
+#####----------------------------------------------#####
+initmongodbcommand="mongo-initdb.py $REMOTEHOST $REMOTEPORT $DBNAME"
+echo $initmongodbcommand
+eval $initmongodbcommand 2> nopaw.mongodb.initialize.err 1> nopaw.mongodb.initialize.out
+
+#####----------------------------------------------#####
 ###--           Executor Launcher                  --###
 #####----------------------------------------------#####
-executorlaunch="jsrun --exit_on_error 1 --nrs $NEXECUTORS --tasks_per_rs 1 --cpu_per_rs $OMP_NUM_THREADS --bind packed:$OMP_NUM_THREADS --launch_distribution plane:1 --smpiargs off db-connector.bash $REMOTEHOST $REMOTEPORT"
+echo "a worklow starts `date +%Y/%m/%d-%H:%M:%S.%5N`"
+
+executorlaunch="jsrun --exit_on_error 1 --nrs $NEXECUTORS --tasks_per_rs 1 --cpu_per_rs $OMP_NUM_THREADS --bind packed:$OMP_NUM_THREADS --launch_distribution plane:1 --smpiargs off db-connector.bash $REMOTEHOST $REMOTEPORT $DBNAME $OPERATION"
 echo $executorlaunch
-eval $executorlaunch 2> executors/nopaw.executor.launch.err 1> executors/nopaw.executor.launch.out & EXEC_APID=$!
+eval $executorlaunch 2> nopaw.executor.launch.err 1> nopaw.executor.launch.out & EXEC_APID=$!
 
 #####----------------------------------------------#####
 ###--           Finishing Up Now                   --###
 #####----------------------------------------------#####
 wait $EXEC_APID
 
+echo "a worklow stops `date +%Y/%m/%d-%H:%M:%S.%5N`"
+
 echo "Going to shut down the database, event is finished"
 kill "$MONGO_APID"
 wait "$MONGO_APID"
+
+count="0"
+sleeptime="3"
+while [ "$count" -lt 12 ]
+do
+  count=$(( count + 1 ))
+  echo "Waiting for database to close, $sleeptime seconds x $count times"
+  if [ ! -f "$DBLOCATION/db/mongod.lock" ]
+  then
+    echo "Database is closed"
+    count="13"
+  elif [ "$count" -eq 12 ]
+  then
+    echo "Manually removing 'mongod' and 'WiredTiger' lock files"
+    rm "$DBLOCATION/db/mongod.lock"
+    rm "$DBLOCATION/db/WiredTiger.lock"
+  fi
+  sleep $sleeptime
+done
+
 kill "$MONGO_GPID"
 wait "$MONGO_GPID"
 rm $DBLOCATION/hostname.txt

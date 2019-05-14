@@ -1,4 +1,52 @@
-
 Usage:
+------
+Source the RC file: 'rt.bashrc'
 
-./runme run10 10 1k
+Run Script Usage:
+runme [runname] [nreplicates] [operation: "read"/"write"]
+    optional: [datasize]
+
+Verify Script Usage:
+verifyrun [runname] [operation: "read"/"write"] [nreplicates]
+    optional: [dbhost] [dbport] [dbname] [datasize]
+
+Analyze Script Usage:
+analyzerun [runname] 
+
+
+Example Run-and-Verify:
+-----------------------
+
+source rt.bashrc
+
+# Test the write operation
+runme write10 10 write
+# read version
+#runme read10 10 read
+
+< ...  wait for run to complete ... >
+
+launch_amongod sessions/write10/mongo
+verifyrun write10 write 10
+kill_amongod write10
+
+
+Example Run Weak Scaling:
+-------------------------
+
+source rt.bashrc
+scales=( 10 40 120 250 500 1000 2008 4016 8048 16000 )
+
+for scale in "${scales[@]}"
+do
+  runme weak-w-$scale $scale write
+done
+
+< ...  wait for run to complete ... >
+
+for scale in "${scales[@]}"
+do
+  verifyrun weak-w-$scale write $scale
+done
+
+anylz

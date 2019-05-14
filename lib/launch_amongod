@@ -4,6 +4,7 @@
 DBPATH=$1
 DBPORT=$2
 LAUNCH=$3
+VERBOSE=$4
 
 # No usage help :(
 # and a non-optimal arg structure
@@ -38,10 +39,11 @@ then
   echo "got args: $DBPATH $DBPORT $LAUNCH"
   echo "no backgrounding"
   echo "a database starts `date +%Y/%m/%d-%H:%M:%S.%5N`"
-  numactl --interleave=all mongod --dbpath $DBPATH/db/ --config $DBPATH/db.cfg &> $DBPATH/db.log
+  numactl --interleave=all mongod --dbpath $DBPATH/db/ --config $DBPATH/db.cfg $VERBOSE &> $DBPATH/db.log
   echo "a database stops `date +%Y/%m/%d-%H:%M:%S.%5N`"
+# Maybe let verbose bleed through as "launch" if matches
 else
-  # Text sensitive here in parent process
+  # Text sensitive output to parent process
   numactl --interleave=all mongod --dbpath $DBPATH/db/ --config $DBPATH/db.cfg &> $DBPATH/db.log & MPID="$!"
   echo $MPID
 fi
