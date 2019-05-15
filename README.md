@@ -19,7 +19,7 @@ operation when you launched the job, and perform
 the operation after they are distributed on the
 HPC, then shutdown following their sleep.
 
-![alt text](https://raw.githubusercontent.com/pawtools/nopaw/branch/nopaw-sequence.png)
+![nopaw execution sequence](https://raw.githubusercontent.com/pawtools/nopaw/branch/nopaw-sequence.png)
 
 The reads or writes can then be verified for data
 integrity. A number of timestamps are reported,
