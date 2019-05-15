@@ -1,13 +1,17 @@
 ## nopaw- just a pipeline
 
-TODO this stuff not up to date
-TODO same order of positional arguments
-TODO option to switch between gridfs based
-     file data and the in-task-document model
+- TODO same order of positional arguments
+       in `runme` and `verifyrun`
+- TODO option to switch between gridfs based
+       file data and the in-task-document model
+- TODO "pipeline" executors with read/write operations
 
 Simple pipeline for database read and write tests.
 A new database is created, and N parallel read/write
 operations take place, plus a 60 second sleep.
+The sleep is sort of a stand-in for the (still TODO)
+pipeline executors.
+
 Simple wrappers are used to place loop-free
 communicators onto your HPC in an LRMS job. The
 communicators are told to do a read or write
@@ -24,9 +28,10 @@ HPC environment.
 
 There are a small number of control parameters that
 can be varied to understand how the performance
-changes in response to different stressors:
+changes in response to expectable stressors:
+
  - Scale: n replicates
- - Operation: read or write
+ - Operation Type: read or write
  - Data Size: size and unit (blank=k, m)
  - Layout Factor: communicators per node
 
