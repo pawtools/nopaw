@@ -2,3 +2,5 @@ sessions/*
 
 **/*.swp
 **/*.swo
+
+rt.bashrc
