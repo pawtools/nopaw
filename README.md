@@ -1,5 +1,7 @@
 ## nopaw- just a pipeline
 
+- TODO new operation types to test file writing via:
+       bash wrapper, python script (+subprocess)
 - TODO same order of positional arguments
        in `runme` and `verifyrun`
 - TODO option to switch between gridfs based
