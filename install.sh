@@ -49,6 +49,7 @@ echo "" >> $SHPROFILE
 echo "export SHPROFILE=\"$SHPROFILE\"" >> $SHPROFILE
 echo "export PATH=\"$CWD:\$PATH\"" >> $SHPROFILE
 echo "export PATH=\"$CWD/lib:\$PATH\"" >> $SHPROFILE
+echo "export PYTHONPATH=\"$CWD/lib/anylz:\$PYTHONPATH\"" >> $SHPROFILE
 
 #----------------------------------------------------------------------#
 # Install MongoDB

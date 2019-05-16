@@ -1,5 +1,7 @@
 ## nopaw- just a pipeline
 
+- TODO write basic test routines:
+       read/write, 
 - TODO new operation types to test file writing via:
        bash wrapper, python script (+subprocess)
 - TODO same order of positional arguments

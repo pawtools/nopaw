@@ -7,49 +7,58 @@ from time import time
 from datetime import datetime
 from pymongo import MongoClient
 
-print("pyscript starting {}".format(datetime.fromtimestamp(time())))
 
-operation = sys.argv[1]
-dbhost = sys.argv[2]
-dbport = sys.argv[3]
-dbname = sys.argv[4]
+print("pyscript starting {}".format(datetime.fromtimestamp(time())))
 print("pyscript recieved args:\n{}".format(sys.argv))
 
-assert operation in {"read","write"}
-assert dbport.find('.') < 0
-dbport = int(dbport)
+if __name__ == "__main__":
+    operation = sys.argv[1]
+    dbhost = sys.argv[2]
+    dbport = sys.argv[3]
+    dbname = sys.argv[4]
 
-thedata = """Jem says hello
-Jem says hi
-Every day Jemerson loves to try
-Things like reading, writing, climbing in a tree
-He's buzzing around like a bizzy bee
-bzzzzzzzzzzzzzzzzzzz
- - jem
-"""
+    assert operation in {"read","write"}
+    assert dbport.find('.') < 0
+    dbport = int(dbport)
 
-mongodb = MongoClient(dbhost, dbport)
-db = mongodb[dbname]
-cl = db[dbname]
-print("sync starting {}".format(datetime.fromtimestamp(time())))
+    thedata = """Jem says hello
+    Jem says hi
+    Every day Jemerson loves to try
+    Things like reading, writing, climbing in a tree
+    He's buzzing around like a bizzy bee
+    bzzzzzzzzzzzzzzzzzzz
+     - jem
+    """
 
-if operation == "write":
-    document = {
-        "_id"   : _uuid_(),
-        "data"  : thedata,
-        "state" : "final",
-    }
-    cl.insert_one(document)
+    mongodb = MongoClient(dbhost, dbport)
+    db = mongodb[dbname]
+    cl = db[dbname]
 
-elif operation == "read":
-    readdata = cl.find_one()
-    if thedata == readdata['data']:
-        print("Data was verified")
-    else:
-        print("This data was not verified: ")
-        print(readdata['data'])
+    if operation == "write":
 
-print("sync stopping {}".format(datetime.fromtimestamp(time())))
-mongodb.close()
-print("pyscript stopping {}".format(datetime.fromtimestamp(time())))
+        document = {
+            "_id"   : _uuid_(),
+            "data"  : thedata,
+            "state" : "final",
+        }
+
+        print("sync starting {}".format(datetime.fromtimestamp(time())))
+        cl.insert_one(document)
+        print("sync stopping {}".format(datetime.fromtimestamp(time())))
+
+    elif operation == "read":
+
+        print("sync starting {}".format(datetime.fromtimestamp(time())))
+        readdata = cl.find_one()
+        print("sync stopping {}".format(datetime.fromtimestamp(time())))
+
+        if thedata == readdata['data']:
+            print("Data was verified")
+
+        else:
+            print("This data was not verified: ")
+            print(readdata['data'])
+
+    mongodb.close()
+    print("pyscript stopping {}".format(datetime.fromtimestamp(time())))
 

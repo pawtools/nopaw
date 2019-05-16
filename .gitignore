@@ -6,3 +6,7 @@ software/*
 # vim swap files
 **/*.swp
 **/*.swo
+
+# Python compiled bytecode
+**/__pycache__
+**/*.pyc
