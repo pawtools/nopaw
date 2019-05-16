@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo ""
+echo "-------------------------------------------------"
+echo ""
 echo "If you are on a funny architecture and cannot use"
 echo "an automatically downloaded MongoDB version, get"
 echo "whichever MongoDB you have into your path so that"
@@ -52,14 +55,24 @@ echo "export PATH=\"$CWD/lib:\$PATH\"" >> $SHPROFILE
 if [ -z "$(command -v mongod)" ]
 then
   cd $SOFTWARE_HOME
-  wget "https://fastdl.mongodb.org/linux/${MONGO_VERSION}.tgz"
-  mv $MONGO_VERSION mongodb
-  rm ${MONGO_VERSION}.tgz
-  echo "export PATH=\"$SOFTWARE_HOME/mongodb/bin:\$PATH\"" >> $SHPROFILE
+  if [ ! -d "mongodb" ]
+  then
+    wget "https://fastdl.mongodb.org/linux/${MONGO_VERSION}.tgz"
+    mv $MONGO_VERSION mongodb
+    rm ${MONGO_VERSION}.tgz
+    echo "export PATH=\"$SOFTWARE_HOME/mongodb/bin:\$PATH\"" >> $SHPROFILE
+  else
+    echo "Found 'mongodb' folder in the given software directory"
+    echo "  --> aborting mongodb install"
+    sleep 5
+  fi
   cd $CWD
 elif [ ! -z "$(which mongod)" ]
 then
   echo "export PATH=\"$(dirname $(which mongod)):\$PATH\"" >> $SHPROFILE
+else
+  echo "Your platform will probably not work, no known"
+  echo "mongodb component is available"
 fi
 
 #----------------------------------------------------------------------#
@@ -67,14 +80,21 @@ fi
 if [ -z "$(command -v conda)" ]
 then
   cd $SOFTWARE_HOME
-  wget "https://repo.continuum.io/miniconda/$CONDA_VERSION"
-  bash "$CONDA_VERSION" -b -p miniconda
-  rm "$CONDA_VERSION"
-  echo "export PATH=\"$SOFTWARE_HOME/miniconda/bin:\$PATH\"" >> $SHPROFILE
-  source $SHPROFILE
-  conda config --add channels omnia --add channels conda-forge
-  conda update --yes --all
-  conda install --yes $PYTHON_REQS
+  if [ ! -d "miniconda" ]
+  then
+    wget "https://repo.continuum.io/miniconda/$CONDA_VERSION"
+    bash "$CONDA_VERSION" -b -p miniconda
+    rm "$CONDA_VERSION"
+    echo "export PATH=\"$SOFTWARE_HOME/miniconda/bin:\$PATH\"" >> $SHPROFILE
+    source $SHPROFILE
+    conda config --add channels omnia --add channels conda-forge
+    conda update --yes --all
+    conda install --yes $PYTHON_REQS
+  else
+    echo "Found 'miniconda' folder in the given software directory"
+    echo "  --> aborting conda install"
+    sleep 5
+  fi
   cd $CWD
 fi
 
