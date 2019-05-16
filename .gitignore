@@ -1,4 +1,8 @@
+# Nopaw Files
+rt.bashrc
 sessions/*
+software/*
 
+# vim swap files
 **/*.swp
 **/*.swo

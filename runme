@@ -4,7 +4,8 @@
 RUNNAME="$1"
 SCALE="$2"
 OPERATION="$3"
-FLOW="$4"
+DATASIZE="$4"
+# TODO project from config or typed
 PROJECT="bif112"
 
 if [ "$#" -lt 3 ]
@@ -14,17 +15,31 @@ then
 fi
 
 LAYFACTOR="42"
-TESTHOME="/gpfs/alpine/bif112/proj-shared/nopaw"
 NNODES=$(( 1 + ( SCALE / LAYFACTOR ) + ( SCALE % LAYFACTOR > 0 ) ))
 
-SHPROFILE="$TESTHOME/rt.bashrc"
-JOBHOME="$TESTHOME/sessions/$RUNNAME"
+if [ ! -f "rt.bashrc" ]
+then
+  echo "Use 'runme' after installing the noPAW platform"
+  echo "to create the (missing) required file 'rt.bashrc'"
+  echo ""
+  echo "  - if you have already done this, you probably are"
+  echo "    trying to use 'runme' outside the nopaw directory"
+  exit  1
+fi
+
+_HOME=$(pwd)
+SHPROFILE="$_HOME/rt.bashrc"
+source $SHPROFILE
+
+JOBHOME="$_HOME/sessions/$RUNNAME"
 DBLOCATION="$JOBHOME/mongo"
 
 mkdir -p "$JOBHOME"
 mkdir -p "$DBLOCATION"
 mkdir -p "$JOBHOME/executors"
 
+# TODO get jobber guy from python
+#      to build these from config
 submitcommand="bsub -o sessions/$RUNNAME/nopaw.out -e sessions/$RUNNAME/nopaw.err -J $RUNNAME -nnodes $NNODES -W 20 -P $PROJECT -env \"all, SHPROFILE=$SHPROFILE, ARGS=$JOBHOME*$DBLOCATION*$LAYFACTOR*$SCALE*$RUNNAME*$OPERATION\" lib/jobscript.lsf"
 
 echo "Submitting job with this command:"

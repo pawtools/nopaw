@@ -10,20 +10,12 @@ set DBLOCATION [lindex $argv 3]
 set DBPORT     [lindex $argv 4]
 set VERBOSE    [lindex $argv 5]
 
-spawn ssh "$SSHHOST"
+spawn ssh -o {StrictHostKeyChecking no} "$SSHHOST"
 
-expect {
-    -- "-bash-"
-    { send "pwd\r" }
-
-    "Are you sure you want to continue connecting (yes/no)?"
-    { send "yes\r" }
-}
-
-#expect -- "-bash-" { send "cd $WORKDIR\r" }
-expect -- "-bash-" { send "ulimit -u 60000\r" }
-expect -- "-bash-" { send "source $SHPROFILE\r" }
-expect -- "-bash-" { send "$SSHEXEC $DBLOCATION $DBPORT --launch $VERBOSE\r" }
-#expect -- "-bash-" { send "sleep 10\r" }
-expect -- "-bash-" { send "echo \"NOTDOING: logging out now\"\r" }
-#expect -- "-bash-" { send "logout\r" }
+#expect -- "*$*" { send "cd $WORKDIR\r" }
+expect -- "*$*" { send "ulimit -u 60000\r" }
+expect -- "*$*" { send "source $SHPROFILE\r" }
+expect -- "*$*" { send "$SSHEXEC $DBLOCATION $DBPORT --launch $VERBOSE\r" }
+#expect -- "*$*" { send "sleep 10\r" }
+expect -- "*$*" { send "echo \"NOTDOING: logging out now\"\r" }
+#expect -- "*$*" { send "logout\r" }
