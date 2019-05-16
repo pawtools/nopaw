@@ -39,20 +39,29 @@ changes in response to expectable stressors:
  - Data Size: size and unit (blank=k, m)
  - Layout Factor: communicators per node
 
-Currently using MongoDB as database and PyMongo 
+Currently nopaw MongoDB as database and PyMongo to
+interface.
 Could easily provide wrappers for simple operations
 with other databases, or exchange the PyMongo
 connector/Python Executor with other interfaces
 such as C++, Java, etc.
 
-Install:
---------
+## Install:
+-----------
 ```
 git clone https://github.com/pawtool/nopaw.git
 ```
 
-Steps:
-------
+## Tests:
+--------------------------------
+Run these to check that your platform installed
+correctly.
+```
+git clone https://github.com/pawtool/nopaw.git
+```
+
+## Steps:
+---------
 0. Copy (and edit if necessary) existing
    LRMS config file to match your resource
 1. `runme` to configure and launch job
@@ -60,8 +69,8 @@ Steps:
 3. `verifyrun` to verify all operations
 4. `analyzerun` to process timestamp data
 
-Usage:
-------
+## Usage:
+---------
 Always source the RC file: 'rt.bashrc'
 
 Run Script Usage:
@@ -76,8 +85,8 @@ TODO Analyze Script Usage:
 analyzerun [runname] 
 
 
-Example Run-and-Verify:
------------------------
+## Example Run-and-Verify:
+--------------------------
 From the directory you cloned for install, just
 use these simple steps to run nopaw.
 
@@ -93,8 +102,8 @@ runme write10 10 write
 verifyrun write10 write 10
 ```
 
-Example Run Weak Scaling of Writes:
--------------------------
+## Example Run Weak Scaling of Writes:
+----------------------------
 
 ```
 source rt.bashrc
