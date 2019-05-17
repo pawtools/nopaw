@@ -7,9 +7,15 @@ from glob import glob
 from pprint import pformat
 import numpy as np
 import anylz
+#import pawutils
+import yaml
 
 #  TODO this is messy wihtout using referenced stamps
 #       --> add to config file
+#  TODO ^^ after that ^^, give durations separate from
+#       stamps
+# TODO support multiple workload files
+# TODO deal with missing files
 
 _is_globbable = lambda x: x.find('*') >= 0
 
@@ -32,7 +38,7 @@ parser.add_argument("-c", "--config",
     help="Path to a configuration file"
 )
 parser.add_argument("-v", "--verbose",
-    help="Output verbosity level"
+    help="NotImplemented: Output verbosity level"
 )
 
 
@@ -57,45 +63,62 @@ if __name__ == "__main__":
         print("Exiting")
         sys.exit(1)
 
-    analyze_configuration = anylz.load_workflow_config(args.config)
+    with open(args.config, 'r') as f_config:
+        #analyze_configuration = pawutils.load_config(args.config)
+        analyze_configuration = yaml.safe_load(f_config)['analyze_workload']
 
-    workflow_filename = analyze_configuration['workflow_filename']
-    tasks_folder = analyze_configuration['tasks_folder']
-    tasks_filenames = analyze_configuration['tasks_filenames']
+    #workload_filenames = analyze_configuration['workload_filenames']
+    workload_filename = analyze_configuration['workload_filenames'][0]
+    tasks_folder       = analyze_configuration['tasks_folder']
+    tasks_filenames    = analyze_configuration['tasks_filenames']
+    workload_sequence  = analyze_configuration['workload_sequence']
+    task_sequence      = analyze_configuration['task_sequence']
+
     n_files_per_task = len(tasks_filenames)
-
-    workload_timestamp_sequence = analyze_configuration['workload_sequence']
-    task_timestamp_sequence = analyze_configuration['task_sequence']
+    timestamp_keys = {
+        'workload': workload_sequence,
+        'task': task_sequence,
+    }
 
     assert all([_is_globbable(tfnm) for tfnm in tasks_filenames])
 
     # Second, initialize data structures
-    workflow_durations = list()
+    workload_durations = list()
     tasks_durations = list()
 
     # Third, process the data
     for session_directory in session_directories:
 
-        assert os.path.exists(os.path.join(session_directory, workflow_filename))
-
+        workload_file = os.path.join(session_directory, workload_filename)
         tasks_files = list()
+
+        assert os.path.exists(workload_file)
 
         for filename in tasks_filenames:
             tasks_files.append(sorted(glob(os.path.join(
                 session_directory,
                 tasks_folder,
-                tasks_filename,
+                filename,
             ))))
 
-        tasks_files = [single for multi in zip(*tasks_files) for single in multi]
+        tasks_files = [
+            single for multi in zip(*tasks_files)
+            for single in multi
+        ]
+        # TODO simple for now but this is not very good,
+        #      --->  what if files are missing?
+        n_replicates = len(tasks_files) / n_files_per_task
+        print(tasks_files)
+        print(n_replicates)
 
         timestamps = anylz.roll_through_session(
             session_directory,
-            workflow_filename,
-            tasks_filename,
-            workflow_timestamps,
+            workload_file,
+            tasks_files,
+            timestamp_keys,
         )
 
+'''
         # TODO aslso assert there is only 1 timestamp for things like start, stop
         assert len(timestamps['workflow']) == 1
         workflowstamps = timestamps['workflow'][0]
@@ -124,3 +147,4 @@ if __name__ == "__main__":
 
 print(_data_format_template.format("N Tasks", "W Dur", "T Dur,avg", "T Dur,std", "T Ini,avg", "T Ini,std", "T I,D,avg", "T I,D,std", "T I,I,avg", "T I,I,std", "T Clz,avg", "T Clz,std"))
 
+'''
