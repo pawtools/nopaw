@@ -18,7 +18,7 @@ pipeline executors.
 
 Simple wrappers are used to place loop-free
 communicators onto your HPC in an LRMS job. The
-communicators are told to do a read or write
+communicators are told to do a `read` or `write`
 operation when you launched the job, and perform
 the operation after they are distributed on the
 HPC, then shutdown following their sleep.
@@ -50,16 +50,21 @@ such as C++, Java, etc.
 
 ## Install:
 -----------
-```
+```bash
 git clone https://github.com/pawtool/nopaw.git
+cd nopaw
+./install.sh
 ```
 
 ## Tests:
 --------------------------------
 Run these to check that your platform installed
-correctly.
-```
-git clone https://github.com/pawtool/nopaw.git
+correctly. Note that you must correctly specify
+a small number of runtime system details in the
+configuration file `nopaw.yml`.
+```bash
+tests/read10
+tests/write10
 ```
 
 ## Steps:
@@ -76,38 +81,45 @@ git clone https://github.com/pawtool/nopaw.git
 Always source the RC file: 'rt.bashrc'
 
 Run Script Usage:
+```bash
 runme [runname] [nreplicates] [operation: "read"/"write"]
     optional: [datasize]
+```
 
 Verify Script Usage:
+```bash
 verifyrun [runname] [operation: "read"/"write"] [nreplicates]
     optional: [dbhost] [dbport] [dbname] [datasize]
+```
 
 TODO Analyze Script Usage:
+```bash
 analyzerun [runname] 
-
-
+```
 ## Example Run-and-Verify:
+
 --------------------------
 From the directory you cloned for install, just
-use these simple steps to run nopaw.
+use these simple steps to run nopaw. These
+examples are set up identical to the preconfigured
+tests.
 
-```
+```bash
 source rt.bashrc
 # Test the write operation
 runme write10 10 write
 # read version
-#runme read10 10 read
+runme read10 10 read
 ```
 < ...  wait for run to complete ... >
-```
+```bash
 verifyrun write10 write 10
 ```
 
 ## Example Run Weak Scaling of Writes:
 ----------------------------
 
-```
+```bash
 source rt.bashrc
 scales=( 10 40 120 250 500 1000 2008 4016 8048 16000 )
 
@@ -117,11 +129,10 @@ do
 done
 ```
 < ...  wait for jobs to complete ... >
-```
+```bash
 for scale in "${scales[@]}"
 do
   verifyrun weak-w-$scale write $scale
+  analyzerun weak-w-$scale write $scale
 done
 ```
-anylz
-
