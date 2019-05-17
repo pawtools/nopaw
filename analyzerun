@@ -1,11 +1,32 @@
 #!/bin/bash
 
 
-
 RUNSERIES="$1"
+OUTFILE="$2"
 
+if [ "$#" -lt 1 ]
+then
+  echo "Must provide arguments [runseries] optional: [outfile]"
+  echo ""
+  echo "Note that [runseries] can be a glob pattern, the idea"
+  echo "here is to be able to process a series of runs together"
+  echo ""
+  exit 1
+fi
 
-lib/analyze-parser.py $RUNSERIES
+if [ ! -f "rt.bashrc" ]
+then
+  echo "Use 'runme' after installing the noPAW platform"
+  echo "to create the (missing) required file 'rt.bashrc'"
+  echo ""
+  echo "  - if you have already done this, you probably are"
+  echo "    trying to use 'runme' outside the nopaw directory"
+  exit  1
+fi
 
+_HOME=$(pwd)
+SHPROFILE="$_HOME/rt.bashrc"
+source $SHPROFILE
 
+lib/analyze-parser.py $RUNSERIES $OUTFILE
 

@@ -1,0 +1,17 @@
+analyze:
+  tasks_folder: "executors"
+  workload_filenames:
+    - "nopaw.out"
+  tasks_filenames:
+    - "nopaw.executor.*"
+    - "nopaw.connector.*"
+  workload_sequence:
+    - "a worklow starts"
+    - "a worklow stops"
+  task_sequence:
+    - "a connector starts"
+    - "pyscript starting"
+    - "sync starting"
+    - "sync stopping"
+    - "pyscript stopping"
+    - "a connector stops"
