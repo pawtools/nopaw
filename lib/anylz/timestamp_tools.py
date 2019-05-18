@@ -5,6 +5,7 @@ collect the timestamps.
 '''
 
 import os
+from glob import glob
 import datetime
 _epoch = datetime.datetime.utcfromtimestamp(0)
 
@@ -13,7 +14,46 @@ from functools import reduce
 
 # TODO documentation!
 
-def get_timestamp_values(filepath, keys):
+def get_session_timestamps(session_directory, workload_filename, tasks_folder, tasks_filenames, timestamp_keys, convert_to_quantity=False):
+
+    workload_file = os.path.join(session_directory, workload_filename)
+    tasks_files = list()
+
+    assert os.path.exists(workload_file)
+
+    for filename in tasks_filenames:
+        tasks_files.append(sorted(glob(os.path.join(
+            session_directory,
+            tasks_folder,
+            filename,
+        ))))
+
+    # FIXME
+    # both flat/grouped cases fail
+    # if any file is missing
+    tasks_files = [
+        multi for multi in zip(*tasks_files)
+    #    single for multi in zip(*tasks_files)
+    #    for single in multi
+    ]
+
+    # FIXME simple for now but this is not very good,
+    #      --->  what if files are missing?
+    n_replicates = len(tasks_files)
+    #n_replicates = len(tasks_files) / n_files_per_task
+
+    timestamps = roll_through_session(
+        session_directory,
+        workload_file,
+        tasks_files,
+        timestamp_keys,
+        convert_to_quantity,
+    )
+
+    return timestamps
+
+
+def get_timestamp_values(filepath, keys, convert_to_quantity=False):
     '''Get the timestamp values from a file
 
     Arguments
@@ -37,12 +77,16 @@ def get_timestamp_values(filepath, keys):
                     and ll[-2].split('-')[0].startswith('2019'):
                         stamp = '_'.join([ll[-2], stamp])
 
-                    stamps.append(stamp)
+                    if convert_to_quantity:
+                        stamps.append(
+                            timestamp_to_sinceepoch(stamp))
+                    else:
+                        stamps.append(stamp)
 
     return timestamps
 
 
-def roll_through_session(session_directory, workflow_filename, tasks_filename, timestamp_keys):
+def roll_through_session(session_directory, workflow_filename, tasks_filename, timestamp_keys, convert_to_quantity=False):
     '''Process all matching task and workflow files
     from a **workload** execution session.
     Arguments
@@ -55,23 +99,30 @@ def roll_through_session(session_directory, workflow_filename, tasks_filename, t
 
     _substr_from_match = lambda s,m: s[ m.a : m.a + m.size ]
 
+    assert isinstance(workflow_filename, str)
     [    # Only 1 file should match!
      filenames.append(os.path.join(session_directory, d))
      if d.find(workflow_filename) >= 0 else None
      for d in os.listdir(session_directory)
     ]
 
+    # pass files for reading to filenames
+    # and reduce filenames to longest
+    # common 
     if isinstance(tasks_filename, list):
         filenames.extend(tasks_filename)
-        # This gets largest common substring
-        tasks_filename = reduce(
-            lambda r,s: _substr_from_match(
-                r, difflib.SequenceMatcher(
-                    None, r, s).find_longest_match(
-                    0, len(r), 0, len(s))),
-            tasks_filename)
+     #del#   # This gets largest common substring
+     #del#   tasks_filename = reduce(
+     #del#       lambda r,s: _substr_from_match(
+     #del#           r, difflib.SequenceMatcher(
+     #del#           None, r, s
+     #del#           ).find_longest_match(
+     #del#           0, len(r), 0, len(s))
+     #del#       ),
+     #del#       tasks_filename
+     #del#   )
 
-        assert len(tasks_filename) > 0
+     #del#   assert len(tasks_filename) > 0
 
     else: 
         [
@@ -80,24 +131,35 @@ def roll_through_session(session_directory, workflow_filename, tasks_filename, t
          for d in os.listdir(session_directory)
         ]
 
-    workflow_timestamps = list()
-    tasks_timestamps = list()
-
-    timestamps = {
-        "workflow": workflow_timestamps,
-        "tasks":    tasks_timestamps,
-    }
+    timestamps = dict()
+    timestamps["workflow"] = workflow_timestamps = list()
+    timestamps["tasks"]    = tasks_timestamps = list()
 
     for filename in filenames:
-        filepath = os.path.abspath(filename)
+        if isinstance(filename, (tuple,list)):
+            _tasks_timestamps = [
+                get_timestamp_values(
+                    os.path.abspath(fnm),
+                    timestamp_keys["task"],
+                    convert_to_quantity,
+                )
+                for fnm in filename
+            ]
+            # FIXME if there were duplicate non-empty keys,
+            # this should raise error instead of randomly
+            # presenting whichever comes last in comprehension
+            _tasks_timestamps = {k:v for d in _tasks_timestamps for k,v in d.items() if v}
 
-        if filepath.find(workflow_filename) >= 0:
-            workflow_timestamps.append(
-                get_timestamp_values(filepath, timestamp_keys["workflow"]))
+        else:
+            filepath = os.path.abspath(filename)
 
-        if filepath.find(tasks_filename) >= 0:
-            tasks_timestamps.append(
-                get_timestamp_values(filepath, timestamp_keys["tasks"]))
+            if filepath.find(workflow_filename) >= 0:
+                workflow_timestamps.append(
+                    get_timestamp_values(filepath, timestamp_keys["workflow"], convert_to_quantity))
+
+            else:
+                tasks_timestamps.append(
+                    get_timestamp_values(filepath, timestamp_keys["tasks"], convert_to_quantity))
 
     return timestamps
 

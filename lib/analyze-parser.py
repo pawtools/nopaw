@@ -83,51 +83,34 @@ if __name__ == "__main__":
     assert all([_is_globbable(tfnm) for tfnm in tasks_filenames])
 
     # Second, initialize data structures
-    workload_durations = list()
-    tasks_durations = list()
+    all_timestamps = dict()
+    workload_durations = dict()
+    tasks_durations = dict()
 
     # Third, process the data
     for session_directory in session_directories:
 
-        workload_file = os.path.join(session_directory, workload_filename)
-        tasks_files = list()
-
-        assert os.path.exists(workload_file)
-
-        for filename in tasks_filenames:
-            tasks_files.append(sorted(glob(os.path.join(
-                session_directory,
-                tasks_folder,
-                filename,
-            ))))
-
-        tasks_files = [
-            single for multi in zip(*tasks_files)
-            for single in multi
-        ]
-        # TODO simple for now but this is not very good,
-        #      --->  what if files are missing?
-        n_replicates = len(tasks_files) / n_files_per_task
-        print(tasks_files)
-        print(n_replicates)
-
-        timestamps = anylz.roll_through_session(
+        all_timestamps[session_directory] = anylz.get_session_timestamps(
             session_directory,
-            workload_file,
-            tasks_files,
+            workload_filename,
+            tasks_folder,
+            tasks_filenames,
             timestamp_keys,
+            convert_to_quantity=True,
         )
 
+  #  for session_directory in session_directories:
+  #      # TODO aslso assert there is only 1 timestamp for things like start, stop
+  #      assert len(timestamps['workflow']) == 1
+
+  #      workflowstamps = timestamps['workflow'][0]
+  #      taskstamps = timestamps['tasks']
+  #      workflow_duration = anylz.timestamp_to_sinceepoch(
+  #          workflowstamps[WorkflowStops][0]
+  #      ) - anylz.timestamp_to_sinceepoch(
+  #          workflowstamps[WorkflowStarts][0]
+  #      )
 '''
-        # TODO aslso assert there is only 1 timestamp for things like start, stop
-        assert len(timestamps['workflow']) == 1
-        workflowstamps = timestamps['workflow'][0]
-        taskstamps = timestamps['tasks']
-        workflow_duration = anylz.timestamp_to_sinceepoch(
-            workflowstamps[WorkflowStops][0]
-        ) - anylz.timestamp_to_sinceepoch(
-            workflowstamps[WorkflowStarts][0]
-        )
         #print(pformat(taskstamps))
         workflow_durations.append( [nreplicates, workflow_duration] )
         # FILTER all tasks to get each different type
