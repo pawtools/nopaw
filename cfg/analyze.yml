@@ -9,15 +9,18 @@ analyze_workload:
     - "nopaw.executor.*"
     - "nopaw.connector.*"
 
-  workload_sequence:
-    - "a worklow starts"
-    - "a worklow stops"
+  workload:
+    - Job:
+      - "a worklow starts"
+      - "a worklow stops"
 
-  task_sequence:
-    - "a connector starts"
-    - "pyscript starting"
-    - "sync starting"
-    - "sync stopping"
-    - "pyscript stopping"
-    - "a connector stops"
-
+  task:
+    - Conn:
+      - "a connector starts"
+      - "a connector stops"
+    - Task:
+      - "pyscript starting"
+      - "pyscript stopping"
+    - Sync:
+      - "sync starting"
+      - "sync stopping"

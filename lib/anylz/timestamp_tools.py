@@ -14,7 +14,9 @@ from functools import reduce
 
 # TODO documentation!
 
-def get_session_timestamps(session_directory, workload_filename, tasks_folder, tasks_filenames, timestamp_keys, convert_to_quantity=False):
+def get_session_timestamps(session_directory, workload_filename, tasks_folder, tasks_filenames, timestamp_keys, convert_to_quantity=False, timestamp_reference=None):
+    # TODO use timestamp reference to select a single
+    #      zero point for the workload/session
 
     workload_file = os.path.join(session_directory, workload_filename)
     tasks_files = list()
@@ -42,6 +44,9 @@ def get_session_timestamps(session_directory, workload_filename, tasks_folder, t
     n_replicates = len(tasks_files)
     #n_replicates = len(tasks_files) / n_files_per_task
 
+    #print(tasks_files)
+    #print(n_replicates)
+
     timestamps = roll_through_session(
         session_directory,
         workload_file,
@@ -63,6 +68,7 @@ def get_timestamp_values(filepath, keys, convert_to_quantity=False):
     keys ::
     TODO 
     '''
+    # TODO remove nonempty on return?
     timestamps = {k: [] for k in keys}
 
     with open(filepath, 'r') as f:
@@ -86,8 +92,8 @@ def get_timestamp_values(filepath, keys, convert_to_quantity=False):
     return timestamps
 
 
-def roll_through_session(session_directory, workflow_filename, tasks_filename, timestamp_keys, convert_to_quantity=False):
-    '''Process all matching task and workflow files
+def roll_through_session(session_directory, workload_filename, tasks_filename, timestamp_keys, convert_to_quantity=False):
+    '''Process all matching task and workload files
     from a **workload** execution session.
     Arguments
     ---------
@@ -99,12 +105,19 @@ def roll_through_session(session_directory, workflow_filename, tasks_filename, t
 
     _substr_from_match = lambda s,m: s[ m.a : m.a + m.size ]
 
-    assert isinstance(workflow_filename, str)
-    [    # Only 1 file should match!
-     filenames.append(os.path.join(session_directory, d))
-     if d.find(workflow_filename) >= 0 else None
-     for d in os.listdir(session_directory)
-    ]
+    assert isinstance(workload_filename, str)
+
+    if os.path.exists(workload_filename):
+        filenames.append(workload_filename)
+
+    else:
+        [    # Only 1 file should match!
+         filenames.append(os.path.join(session_directory, d))
+         if d.find(workload_filename) >= 0 else None
+         for d in os.listdir(session_directory)
+        ]
+
+    assert len(filenames) == 1
 
     # pass files for reading to filenames
     # and reduce filenames to longest
@@ -132,8 +145,8 @@ def roll_through_session(session_directory, workflow_filename, tasks_filename, t
         ]
 
     timestamps = dict()
-    timestamps["workflow"] = workflow_timestamps = list()
-    timestamps["tasks"]    = tasks_timestamps = list()
+    timestamps["workload"] = workload_timestamps = list()
+    timestamps["task"]     = tasks_timestamps = list()
 
     for filename in filenames:
         if isinstance(filename, (tuple,list)):
@@ -148,18 +161,18 @@ def roll_through_session(session_directory, workflow_filename, tasks_filename, t
             # FIXME if there were duplicate non-empty keys,
             # this should raise error instead of randomly
             # presenting whichever comes last in comprehension
-            _tasks_timestamps = {k:v for d in _tasks_timestamps for k,v in d.items() if v}
+            tasks_timestamps.append({k:v for d in _tasks_timestamps for k,v in d.items() if v})
 
         else:
             filepath = os.path.abspath(filename)
 
-            if filepath.find(workflow_filename) >= 0:
-                workflow_timestamps.append(
-                    get_timestamp_values(filepath, timestamp_keys["workflow"], convert_to_quantity))
+            if filepath.find(workload_filename) >= 0:
+                workload_timestamps.append(
+                    get_timestamp_values(filepath, timestamp_keys["workload"], convert_to_quantity))
 
             else:
                 tasks_timestamps.append(
-                    get_timestamp_values(filepath, timestamp_keys["tasks"], convert_to_quantity))
+                    get_timestamp_values(filepath, timestamp_keys["task"], convert_to_quantity))
 
     return timestamps
 
@@ -171,6 +184,8 @@ def timestamp_to_sinceepoch(timestamp, time_format=''):
     '''
     # TODO support format given by argument
     possible_formats = [
+        '%Y/%m/%d-%H:%M:%S',
+        '%Y-%m-%d_%H:%M:%S',
         '%Y/%m/%d-%H:%M:%S.%f',
         '%Y-%m-%d_%H:%M:%S.%f',
     ]

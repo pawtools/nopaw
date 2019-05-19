@@ -1,15 +1,12 @@
 #!/bin/bash
 
 
-RUNSERIES="$1"
-OUTFILE="$2"
-
 if [ "$#" -lt 1 ]
 then
   echo "Must provide arguments [runseries] optional: [outfile]"
   echo ""
-  echo "Note that [runseries] can be a glob pattern, the idea"
-  echo "here is to be able to process a series of runs together"
+  echo "[runseries] can be a glob pattern or single session folder, the"
+  echo "idea here is to be able to process a series of runs together"
   echo ""
   exit 1
 fi
@@ -28,5 +25,15 @@ _HOME=$(pwd)
 SHPROFILE="$_HOME/rt.bashrc"
 source $SHPROFILE
 
-lib/analyze-parser.py $RUNSERIES $OUTFILE
+if [ "$#" -gt 1 ]
+then
+  echo "Doing as many"
+  for RS in "$@"
+  do
+    lib/analyze-parser.py $RS
+  done
+else
+  echo "Doing as 1"
+  lib/analyze-parser.py $1
+fi
 
