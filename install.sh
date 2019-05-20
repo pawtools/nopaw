@@ -46,6 +46,7 @@ mkdir -p "$SOFTWARE_HOME"
 
 echo "module unload python" >> $SHPROFILE
 echo "" >> $SHPROFILE
+echo "export PAW_HOME=\"$CWD\"" >> $SHPROFILE
 echo "export SHPROFILE=\"$SHPROFILE\"" >> $SHPROFILE
 echo "export PATH=\"$CWD:\$PATH\"" >> $SHPROFILE
 echo "export PATH=\"$CWD/lib:\$PATH\"" >> $SHPROFILE

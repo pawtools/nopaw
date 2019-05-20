@@ -11,29 +11,22 @@ then
   exit 1
 fi
 
-if [ ! -f "rt.bashrc" ]
+if [ -z "$SHPROFILE" ]
 then
-  echo "Use 'runme' after installing the noPAW platform"
-  echo "to create the (missing) required file 'rt.bashrc'"
-  echo ""
-  echo "  - if you have already done this, you probably are"
-  echo "    trying to use 'runme' outside the nopaw directory"
-  exit  1
+  echo "Use 'analyzerun' after sourcing the file 'rt.bashrc' in PAW"
+  echo "platform home directory. Note you must install the PAW"
+  echo "platform first by running 'install.sh'"
 fi
 
-_HOME=$(pwd)
-SHPROFILE="$_HOME/rt.bashrc"
 source $SHPROFILE
 
 if [ "$#" -gt 1 ]
 then
-  echo "Doing as many"
   for RS in "$@"
   do
-    lib/analyze-parser.py $RS
+    analyze-parser.py $RS
   done
 else
-  echo "Doing as 1"
-  lib/analyze-parser.py $1
+  analyze-parser.py $1
 fi
 

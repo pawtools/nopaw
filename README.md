@@ -1,7 +1,14 @@
 ## nopaw- just a pipeline
 
 - TODO write basic test routines:
-       read/write, 
+       read/write - (live) execution unit test with
+                    runme followed by verifyrun
+       verifyrun  - use pre-existing read-10/write-10
+                    to ensure verify methods continue
+                    to give expected result
+       analyzerun - use pre-existing read-10/write-10
+                    to ensure analysis methods continue
+                    to give expected result
 - TODO new operation types to test file writing via:
        bash wrapper, python script (+subprocess)
 - TODO same order of positional arguments
