@@ -9,10 +9,42 @@ from glob import glob
 import datetime
 _epoch = datetime.datetime.utcfromtimestamp(0)
 
+import argparse
 import difflib
 from functools import reduce
 
 # TODO documentation!
+
+def parser():
+    parser = argparse.ArgumentParser(description="Analyze nopaw runs")
+    parser.add_argument("session_directories",
+        help="Glob pattern or single directory to analyze"
+    )
+    parser.add_argument("output_timestamps",
+        nargs="?", default="timestamps.txt",
+        help="File name for writing analysis data (within each session)"
+    )
+    parser.add_argument("output_analysis",
+        nargs="?", default="analysis.txt",
+        help="File name for writing analysis data (within each session)"
+    )
+    parser.add_argument("output_profile",
+        nargs="?", default="profile.txt",
+        help="File name for writing profile data (within each session)"
+    )
+    parser.add_argument("-c", "--config",
+        default="cfg/analyze.yml",
+        help="Path to a configuration file"
+    )
+    parser.add_argument("-p", "--plot",
+        default="",
+        help="Relative path to plots file (across given sessions sorted by N replicates)",
+    )
+    parser.add_argument("-v", "--verbose",
+        help="NotImplemented: Output verbosity level"
+    )
+    return parser
+
 
 def get_session_timestamps(session_directory, workload_filename, tasks_folder, tasks_filenames, timestamp_keys, convert_to_quantity=False, timestamp_reference=None):
     # TODO use timestamp reference to select a single

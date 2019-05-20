@@ -2,7 +2,6 @@
 
 import os
 import sys
-import argparse
 from glob import glob
 from pprint import pformat
 import numpy as np
@@ -17,37 +16,16 @@ import yaml
 # TODO support multiple workload files
 # TODO deal with missing files
 
+def collect_XY_columns(data, key):
+    assert isinstance(data, dict)
+
+    X = sorted(data)
+    Y = [data[x][key] for x in X]
+
+    return np.array(X, Y)
+
+
 _is_globbable = lambda x: x.find('*') >= 0
-
-_data_format_template = (
-    "{0: <7} {1: <12} {2: <12} {3: <12} "
-    "{4: <12} {5: <12} {6: <12} {7: <12} "
-    "{8: <12} {9: <12} {10: <12} {11: <12}"
-)
-
-parser = argparse.ArgumentParser(description="Analyze nopaw runs")
-parser.add_argument("session_directories",
-    help="Glob pattern or single directory to analyze"
-)
-parser.add_argument("output_timestamps",
-    nargs="?", default="timestamps.txt",
-    help="File name for writing analysis data (within each session)"
-)
-parser.add_argument("output_analysis",
-    nargs="?", default="analysis.txt",
-    help="File name for writing analysis data (within each session)"
-)
-parser.add_argument("output_profile",
-    nargs="?", default="profile.txt",
-    help="File name for writing profile data (within each session)"
-)
-parser.add_argument("-c", "--config",
-    default="cfg/analyze.yml",
-    help="Path to a configuration file"
-)
-parser.add_argument("-v", "--verbose",
-    help="NotImplemented: Output verbosity level"
-)
 
 #_unpack_stampkeys = lambda x: [s for c in x.values() for s in c]
 # assumes the given order and strict embedding
@@ -61,9 +39,11 @@ _create_sequence  = lambda y: [
     for single in multi
 ]
 
+
 if __name__ == "__main__":
 
     # First, handle arguments
+    parser = anylz.parser()
     args = parser.parse_args()
 
     print(args)
@@ -124,8 +104,8 @@ if __name__ == "__main__":
 
     # Second, initialize data structures
     all_timestamps = dict()
-    workload_durations = dict()
-    tasks_durations = dict()
+    durations = dict()
+    analysis = dict()
 
     # Third, process the data
     for session_directory in session_directories:
@@ -139,8 +119,18 @@ if __name__ == "__main__":
             convert_to_quantity=True,
         )
 
-    durations = dict()
-    analysis = dict()
+    # TODO incorporate into config
+    interval_keys = dict()
+    interval_keys['workload'] = workload = [workloadStart, workloadStop]
+    interval_keys['taskinit'] = taskinit = [workloadStart, taskConnStart]
+    interval_keys['taskstop'] = taskstop = [taskConnStop, workloadStop]
+    interval_keys['taskmain'] = taskmain = [taskMainStart, taskMainStop]
+    interval_keys['tasktask'] = tasktask = [taskTaskStart, taskTaskStop]
+    interval_keys['taskconn'] = taskconn = [taskConnStart, taskConnStop]
+    interval_keys['taskboot'] = taskboot = [taskConnStart, taskTaskStart]
+    interval_keys['taskpre']  = taskpre  = [taskTaskStart, taskMainStart]
+    interval_keys['taskpost'] = taskpost = [taskMainStop, taskTaskStop]
+    interval_keys['taskend']  = taskpost = [taskTaskStop, taskConnStop]
 
     for session_directory, timestamps in all_timestamps.items():
         # TODO aslso assert there is only 1 timestamp for things like start, stop
@@ -148,13 +138,6 @@ if __name__ == "__main__":
 
         durations[session_directory] = durs = dict()
         analysis[session_directory] = anls = dict()
-
-        durs['workload'] = workload_duration = list()
-        durs['taskinit'] = taskinit_duration = list()
-        durs['taskmain'] = taskmain_duration = list()
-        durs['tasktask'] = tasktask_duration = list()
-        durs['taskconn'] = taskconn_duration = list()
-        durs['taskstop'] = taskstop_duration = list()
 
         workloadstamps = timestamps['workload'][0]
         workload_duration.append(workloadstamps[workloadStop][0] - workloadstamps[workloadStart][0])
@@ -183,6 +166,17 @@ if __name__ == "__main__":
         with open(output_timestamps_path, 'w') as f_out:
             f_out.write(pformat(timestamps)+'\n')
 
+
+    if args.plot:
+        key_to_label = {
+            taskMain
+        }
+        plot_data = dict()
+        for session_directory in session_directories:
+            # FIXME clearly need better way
+            n_replicates = len(durations[session_directory]["taskmain"])
+            plot_data[n_replicates] = analysis[session_directory]
+            for key in :
 '''
         #print(pformat(taskstamps))
         workflow_durations.append( [nreplicates, workflow_duration] )
