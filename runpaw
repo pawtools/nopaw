@@ -1,0 +1,49 @@
+#!/bin/bash
+
+
+# TODO single portal to analyze, verify, or run
+#      that just passes options along for later
+#      processing by the individual utility
+
+# TODO separate verifier and usage feedback for
+#      each of the 3 possible choices of utility
+if [ "$#" -lt 3 ]
+then
+  echo "Must provide arguments [runname] [nreplicates] [\"read\"/\"write\"] optional: [datasize]"
+  exit 1
+fi
+
+if [ -z "$SHPROFILE" ]
+then
+  echo "Use 'runme' after sourcing the file 'rt.bashrc' in PAW"
+  echo "platform home directory. Note you must install the PAW"
+  echo "platform first by running 'install.sh'"
+fi
+
+RUNNAME="$1"
+SCALE="$2"
+OPERATION="$3"
+DATASIZE="$4"
+
+# TODO project from config or typed
+PROJECT="bif112"
+LAYFACTOR="42"
+NNODES=$(( 1 + ( SCALE / LAYFACTOR ) + ( SCALE % LAYFACTOR > 0 ) ))
+
+source $SHPROFILE
+
+# TODO sessions folder as configurable
+JOBHOME="$PAW_HOME/sessions/$RUNNAME"
+DBLOCATION="$JOBHOME/mongo"
+
+mkdir -p "$JOBHOME"
+mkdir -p "$DBLOCATION"
+mkdir -p "$JOBHOME/executors"
+
+# TODO get jobber guy from python
+#      to build these from config
+submitcommand="bsub -o sessions/$RUNNAME/nopaw.out -e sessions/$RUNNAME/nopaw.err -J $RUNNAME -nnodes $NNODES -W 20 -P $PROJECT -env \"all, SHPROFILE=$SHPROFILE, ARGS=$JOBHOME*$DBLOCATION*$LAYFACTOR*$SCALE*$RUNNAME*$OPERATION\" lib/jobscript.lsf"
+
+echo "Submitting job with this command:"
+echo $submitcommand
+eval $submitcommand
