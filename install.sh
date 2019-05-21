@@ -9,7 +9,7 @@ echo "whichever MongoDB you have into your path so that"
 echo "a \`which mongod\` command reports the location"
 echo "before running this script:"
 echo "PATH=/path/to/mongo/bin:\$PATH"
-sleep 10
+sleep 7
 echo ""
 echo "-------------------------------------------------"
 echo "-------- Installing noPAW Test Platform ---------"
@@ -60,7 +60,7 @@ echo "export PAW_HOME=\"$CWD\"" >> $SHPROFILE
 echo "export SHPROFILE=\"$SHPROFILE\"" >> $SHPROFILE
 echo "export PATH=\"$CWD:\$PATH\"" >> $SHPROFILE
 echo "export PATH=\"$CWD/lib:\$PATH\"" >> $SHPROFILE
-echo "export PYTHONPATH=\"$CWD/lib/anylz:\$PYTHONPATH\"" >> $SHPROFILE
+echo "export PYTHONPATH=\"$CWD/lib/pawtools:\$PYTHONPATH\"" >> $SHPROFILE
 
 #----------------------------------------------------------------------#
 # Install MongoDB

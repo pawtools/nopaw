@@ -50,7 +50,10 @@ def parser():
     return parser
 
 
-def get_session_timestamps(session_directory, workload_filename, tasks_folder, tasks_filenames, timestamp_keys, convert_to_quantity=False, timestamp_reference=None):
+def get_session_timestamps(
+        session_directory, workload_filename, tasks_folder, tasks_filenames,
+        timestamp_keys, convert_to_quantity=False, timestamp_reference=None):
+
     # TODO use timestamp reference to select a single
     #      zero point for the workload/session
 
@@ -128,7 +131,8 @@ def get_timestamp_values(filepath, keys, convert_to_quantity=False):
     return timestamps
 
 
-def roll_through_session(session_directory, workload_filename, tasks_filename, timestamp_keys, convert_to_quantity=False):
+def roll_through_session(session_directory, workload_filename, tasks_filename,
+        timestamp_keys, convert_to_quantity=False):
     '''Process all matching task and workload files
     from a **workload** execution session.
     Arguments
@@ -197,24 +201,33 @@ def roll_through_session(session_directory, workload_filename, tasks_filename, t
             # FIXME if there were duplicate non-empty keys,
             # this should raise error instead of randomly
             # presenting whichever comes last in comprehension
-            tasks_timestamps.append({k:v for d in _tasks_timestamps for k,v in d.items() if v})
+            tasks_timestamps.append({
+                k:v
+                for d in _tasks_timestamps
+                for k,v in d.items() if v
+            })
 
         else:
             filepath = os.path.abspath(filename)
 
             if filepath.find(workload_filename) >= 0:
                 workload_timestamps.append(
-                    get_timestamp_values(filepath, timestamp_keys["workload"], convert_to_quantity))
+                    get_timestamp_values(
+                        filepath,
+                        timestamp_keys["workload"],
+                        convert_to_quantity))
 
             else:
                 tasks_timestamps.append(
-                    get_timestamp_values(filepath, timestamp_keys["task"], convert_to_quantity))
+                    get_timestamp_values(filepath,
+                        timestamp_keys["task"],
+                        convert_to_quantity))
 
     return timestamps
 
 
 def timestamp_to_sinceepoch(timestamp, time_format=''):
-    '''Convert timestamp to easily-compared value
+    '''Convert timestamp to an easily-compared value.
     Here we just use time-since-epoch for quantifying all
     timestamp values
     '''
