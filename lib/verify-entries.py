@@ -27,9 +27,11 @@ if __name__ == "__main__":
         operation = "write"
         nreplicates = "10"
 
-    verify_filename = os.path.join("sessions", runname, "verify-data.pyd")
-    verified = os.path.join("sessions", runname, "verified.true")
-    notverified = os.path.join("sessions", runname, "verified.false")
+    session_directory = os.path.join("sessions", runname)
+
+    verified = os.path.join(session_directory, "verified.true")
+    notverified = os.path.join(session_directory, "verified.false")
+    verify_filename = os.path.join(session_directory, "verify-data.pyd")
 
     assert dbport.find('.') < 0
     assert nreplicates.find('.') < 0
@@ -45,20 +47,47 @@ if __name__ == "__main__":
      - jem
     """
 
+    # FIXME NOTE we (hopefully) harmlessly opening
+    #            and closing the DB even for read
+    #            verify where its not used
     mongodb = MongoClient(dbhost, dbport)
 
     db = mongodb[dbname]
     cl = db[dbname]
 
     verify_data = dict()
-    verify_data["count"] = count = 0
     verify_data["correct"] = correct = list()
     verify_data["wrong"] = wrong = list()
 
+    count = 0
+
     if operation == "read":
-        raise NotImplemented
+        # NOTE this is not an independent verifitcation
+        #      - the task knows what the data was and
+        #        checked it on the fly, no other way to
+        #        allow later verification without adding
+        #        additional task operations
+        verified_message = "Data was verified"
+        executors_prefix = os.path.join(session_directory, 'executors')
+        executor_filename = "nopaw.executor."
+        executors = map(
+            lambda ffnm: os.path.join(executors_prefix, ffnm),
+            filter(lambda fnm: fnm.find(executor_filename) >= 0,
+                os.listdir(executors_prefix)
+            )
+        )
+
+        for executor in executors:
+            for line in open(executor, 'r').readlines():
+                if line.strip() == verified_message:
+                    count += 1
+                    correct.append(executor)
+                    break
+            else:
+                wrong.append(executor)
 
     elif operation == "write":
+        # NOTE writes are verified here and now
         for document in cl.find():
             count += 1
             if thedata == document["data"]:
@@ -68,29 +97,35 @@ if __name__ == "__main__":
                 print("this data was 'wrong':")
                 print(document["data"])
 
+
+    if len(verify_data["wrong"]) == 0:
         # database is always primed with
         # data using for the read operation
-        if len(verify_data["wrong"]) == 0:
-            if len(verify_data["correct"]) == 1 + nreplicates:
-                print("All {0}/{1} replicates verified".format(
-                    len(verify_data["correct"]), nreplicates))
+        # so... the write verify method above
+        #       counts an extra entry, just
+        #       letting it fly for now
+        if operation == "write" and len(verify_data["correct"]) == 1 + nreplicates \
+        or operation == "read" and len(verify_data["correct"]) == nreplicates:
+            print("All {0}/{1} replicates verified".format(
+                len(verify_data["correct"]), nreplicates))
 
-                open(verified, 'w').close()
-
-            else:
-                print("None wrong, but only have data")
-                print("for {0}/{1} replicates".format(
-                    len(verify_data["correct"]), nreplicates))
-
-                open(notverified, 'w').close()
+            open(verified, 'w').close()
 
         else:
-            print("{0}/{1} replicates had incorrect data".format(
-                len(verify_data["wrong"]), nreplicates))
+            print("None wrong, but only have data")
+            print("for {0}/{1} replicates".format(
+                len(verify_data["correct"]), nreplicates))
 
             open(notverified, 'w').close()
 
+    else:
+        print("{0}/{1} replicates had incorrect data".format(
+            len(verify_data["wrong"]), nreplicates))
 
+        open(notverified, 'w').close()
+
+
+    verify_data["count"] = count
     with open(verify_filename, 'w') as f_verify:
         f_verify.write(pformat(verify_data))
 

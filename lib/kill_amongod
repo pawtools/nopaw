@@ -4,9 +4,9 @@ SEARCHKEY="$1"
 
 if [ ! -z "$SEARCHKEY" ]
 then
-  MP=`ps faux | grep "mongod" | grep -v "grep" | grep "$SEARCHKEY" | tail -n1`
+  MP=`ps faux | grep "mongod" | grep -v "grep" | grep -v "kill_amongod" | grep "$SEARCHKEY" | tail -n1`
 else
-  MP=`ps faux | grep "mongod" | grep -v "grep"| tail -n1`
+  MP=`ps faux | grep "mongod" | grep -v "grep" | grep -v "kill_amongod" | tail -n1`
 fi
 
 MPID=`echo $MP | awk '{print $2}'`
@@ -28,4 +28,5 @@ then
   kill $MPID
 else
   echo "Ok, not doing anything"
+  echo "(press lower case \"y\" to kill)"
 fi
