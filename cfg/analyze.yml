@@ -1,26 +1,29 @@
-analyze_workload:
-  #parent_folder: "sessions"
-  tasks_folder: "executors"
-
-  workload_filenames:
-    - "nopaw.out"
-
-  tasks_filenames:
-    - "nopaw.executor.*"
-    - "nopaw.connector.*"
-
+analyze:
   workload:
-    - Job:
-      - "a worklow starts"
-      - "a worklow stops"
+    folder: "sessions"
+
+    filenames:
+      - "nopaw.out"
+
+    timestamps:
+      - Job:
+        - "a worklow starts"
+        - "a worklow stops"
 
   task:
-    - Conn:
-      - "a connector starts"
-      - "a connector stops"
-    - Task:
-      - "pyscript starting"
-      - "pyscript stopping"
-    - Sync:
-      - "sync starting"
-      - "sync stopping"
+    folder: "executors"
+
+    filenames:
+      - "nopaw.executor.*"
+      - "nopaw.connector.*"
+
+    timestamps:
+      - Conn:
+        - "a connector starts"
+        - "a connector stops"
+      - Task:
+        - "pyscript starting"
+        - "pyscript stopping"
+      - Sync:
+        - "sync starting"
+        - "sync stopping"

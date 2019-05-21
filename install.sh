@@ -23,7 +23,17 @@ echo "and cannot be easily downloaded on the command line."
 echo "(see above message about having the installer hook"
 echo " on to whatever mongo you do have)"
 echo ""
-sleep 10
+echo "If you have your mongod situatated and are ready to proceed"
+echo ""
+read -t 1 -n 99999 discard
+read -n 1 -p  " >>> then type \"y\": " proceedinput
+
+if [ ! "$proceedinput" = "y" ]
+then
+  echo "Quitting"
+  echo ""
+  exit 0
+fi
 
 #----------------------------------------------------------------------#
 # CONFIGURATION:

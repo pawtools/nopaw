@@ -1,14 +1,17 @@
 ## nopaw- just a pipeline
 
 - TODO write basic test routines:
-       read/write - (live) execution unit test with
-                    runme followed by verifyrun
-       verifyrun  - use pre-existing read-10/write-10
-                    to ensure verify methods continue
+       read/write - 1. (live) execution unit test with
+                    runme followed by 2. verifyrun
+       verifyrun  - 1. use pre-existing read-10/write-10
+                    to 2. ensure verify methods continue
                     to give expected result
-       analyzerun - use pre-existing read-10/write-10
-                    to ensure analysis methods continue
+       analyzerun - 1. use pre-existing read-10/write-10
+                    to 2. ensure analysis methods continue
                     to give expected result
+       each of these 3 test modes should be run with
+       each of the task/operation types
+
 - TODO new operation types to test file writing via:
        bash wrapper, python script (+subprocess)
 - TODO same order of positional arguments
@@ -68,10 +71,9 @@ cd nopaw
 Run these to check that your platform installed
 correctly. Note that you must correctly specify
 a small number of runtime system details in the
-configuration file `nopaw.yml`.
+configuration file `workload.yml`.
 ```bash
-tests/read10
-tests/write10
+tests/run-all-tests
 ```
 
 ## Steps:
