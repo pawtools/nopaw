@@ -2,12 +2,12 @@
 
 import os
 import sys
+import yaml
 from glob import glob
 from pprint import pformat
 import numpy as np
-import anylz
-#import pawutils
-import yaml
+
+from pawtools import get_session_timestamps
 
 # TODO TODO TODO read the files and restore data structres
 #                to make later plotting super easy!
@@ -62,23 +62,18 @@ _create_sequence  = lambda y: [
 ]
 
 
-if __name__ == "__main__":
-
+def main(args):
     #-----------------------------------------------------------#
     # First, handle arguments
-    parser = anylz.parser()
-    args = parser.parse_args()
-
     print(args)
-    print(sys.argv)
 
-    if not _is_globbable(args.session_directories):
+    if not _is_globbable(args.session_directory):
         # Looking to process MANY   directories
-        session_directories = glob(args.session_directories)
+        session_directories = glob(args.session_directory)
 
-    elif os.path.exists(args.session_directories):
+    elif os.path.exists(args.session_directory):
         # Looking to process SINGLE directories
-        session_directories = [args.session_directories]
+        session_directories = [args.session_directory]
 
     else:
         print("session_directories must be single folder or set of folders")
@@ -161,7 +156,7 @@ if __name__ == "__main__":
     # Fourth, read in the workload profile data
     for session_directory in session_directories:
 
-        all_timestamps[session_directory] = anylz.get_session_timestamps(
+        all_timestamps[session_directory] = get_session_timestamps(
             session_directory,
             workload_filename,
             tasks_folder,
@@ -226,3 +221,8 @@ if __name__ == "__main__":
             w_total.append(analysis[session_directory][workload])
 
         plot_weak_scaling.makeplot(n_replicates, w_total, plot_filepath)
+
+
+if __name__ == "__main__":
+    main()
+
