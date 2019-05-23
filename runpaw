@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 
-from pawtools import get_parser, analyzer, verifier, workload
+from pawtools import get_parser, get_logger, analyzer, verifier, workload
 
 if __name__ == "__main__":
 
     parser = get_parser()
     args = parser.parse_args()
+    print(args)
+
+    logger = get_logger(__name__, "INFO" if args.verbose else "WARNING")
+    logger.info("Running PAW command '%s'"%args.command)
+    logger.info("with args {}".format(args))
 
     if args.command == "workload":
         workload(args)

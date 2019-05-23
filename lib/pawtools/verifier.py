@@ -5,9 +5,12 @@ import os
 from pprint import pformat
 from pymongo import MongoClient
 
+__all__ = [
+    "verifier",
+]
 
-print("verify script recieved args:\n{}".format(
-    sys.argv))
+def verifier():
+    pass
 
 if __name__ == "__main__":
 

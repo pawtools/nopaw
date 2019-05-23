@@ -8,6 +8,7 @@ from pprint import pformat
 import numpy as np
 
 from pawtools.timestamp import get_session_timestamps
+from pawtools.logger import get_logger
 
 __all__ = [
     "analyzer",
@@ -66,10 +67,11 @@ _create_sequence  = lambda y: [
 
 
 def analyzer(args):
+    logger = get_logger(__name__, "INFO" if args.verbose else "WARNING")
+    logger.info(pformat(args))
+
     #-----------------------------------------------------------#
     # First, handle arguments
-    print(args)
-
     if not _is_globbable(args.session_directory):
         # Looking to process MANY   directories
         session_directories = glob(args.session_directory)

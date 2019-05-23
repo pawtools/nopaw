@@ -14,11 +14,6 @@ def get_parser():
         description="Run 'workload', 'verify', or 'analyze' command with PAW",
         add_help=False,
     )
-    parser.add_argument("-v", "--verbose",
-        action="store_true",
-        help="NotImplemented: Output verbosity level"
-    )
-
     # DEFINE subparsers for workload execution,
     #        verification, and analysis paw commands
     subparsers = parser.add_subparsers(
@@ -26,28 +21,37 @@ def get_parser():
         dest="command",
     )
     workload_parser = subparsers.add_parser(
-        "workload", parents=[parser],
+        "workload",
         description="Run a PAW workload",
     )
     verify_parser = subparsers.add_parser(
-        "verify", parents=[parser],
+        "verify",
         description="Verify that a PAW workload ran as expected",
     )
     analyze_parser = subparsers.add_parser(
-        "analyze", parents=[parser],
+        "analyze",
         description="Analyze (1 or a series of) nopaw workloads",
     )
-    # DEFINE subparser arguments
+
+    # DEFINE arguments
+    #   - TOP
+    parser.add_argument("-v", "--verbose",
+        action="store_true",
+        help="NotImplemented: Output verbosity level"
+    )
+
     #   - WORKLOAD
     workload_parser.add_argument("session_directory",
         help="Single directory for 'workload' command",
     )
+
     #   - VERIFY
     verify_parser.add_argument("session_directory",
         help="Single directory for 'verify' command",
     )
+
     #   - ANALYZE
-    parser.add_argument("session_directory",
+    analyze_parser.add_argument("session_directory",
         help="Single or glob pattern for 'analyze' command."
     )
     analyze_parser.add_argument("output_timestamps",
