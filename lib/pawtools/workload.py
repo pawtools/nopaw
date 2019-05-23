@@ -12,6 +12,11 @@ import yaml
 
 from string import Formatter
 
+__all__ = [
+    "MongoInstance",
+    "SessionMover",
+    "JobBuilder",
+]
 
 get_format_fields = lambda s: [
     fname for _, fname, _, _
