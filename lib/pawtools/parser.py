@@ -4,44 +4,52 @@
 import argparse
 
 __all__ = [
-    "paw_parser",
+    "get_parser",
 ]
 
-def paw_parser():
+def get_parser():
     # TOP LEVEL parser
+    # TODO tricks to get monolithic help
     parser = argparse.ArgumentParser(
-        description="Run 'workload', 'verify', or 'analyze' command with PAW"
-    )
-    parser.add_argument("session_directory",
-        help=("Single directory for 'workload' or 'verify' commands,",
-              " single or glob patter for 'analyze' command.")
+        description="Run 'workload', 'verify', or 'analyze' command with PAW",
+        add_help=False,
     )
     parser.add_argument("-v", "--verbose",
         action="store_true",
         help="NotImplemented: Output verbosity level"
     )
 
-    # DEFINE subparsers for workload execution, verification, and analysis
+    # DEFINE subparsers for workload execution,
+    #        verification, and analysis paw commands
     subparsers = parser.add_subparsers(
-        title="PAW Command"
-        dest="command"
+        title="PAW Commands",
+        dest="command",
     )
     workload_parser = subparsers.add_parser(
         "workload", parents=[parser],
-         help="Run a PAW workload",
+        description="Run a PAW workload",
     )
     verify_parser = subparsers.add_parser(
         "verify", parents=[parser],
-        help="Verify that a PAW workload ran as expected",
+        description="Verify that a PAW workload ran as expected",
     )
     analyze_parser = subparsers.add_parser(
         "analyze", parents=[parser],
-        help="Analyze (1 or a series of) nopaw workloads",
+        description="Analyze (1 or a series of) nopaw workloads",
     )
-    # DEFINE subparsers arguments
+    # DEFINE subparser arguments
     #   - WORKLOAD
+    workload_parser.add_argument("session_directory",
+        help="Single directory for 'workload' command",
+    )
     #   - VERIFY
+    verify_parser.add_argument("session_directory",
+        help="Single directory for 'verify' command",
+    )
     #   - ANALYZE
+    parser.add_argument("session_directory",
+        help="Single or glob pattern for 'analyze' command."
+    )
     analyze_parser.add_argument("output_timestamps",
         nargs="?", default="timestamps.txt",
         help="File name for writing timestamps data (within each session)"

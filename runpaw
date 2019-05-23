@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
-from pawtools import parser, analyzer, verifier, workloader
+from pawtools import get_parser, analyzer, verifier, workload
 
 if __name__ == "__main__":
 
+    parser = get_parser()
     args = parser.parse_args()
 
     if args.command == "workload":
-        workloader(args)
+        workload(args)
 
     elif args.command == "verify":
         verifier(args)

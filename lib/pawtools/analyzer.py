@@ -7,8 +7,11 @@ from glob import glob
 from pprint import pformat
 import numpy as np
 
-from pawtools import get_session_timestamps
+from pawtools.timestamp import get_session_timestamps
 
+__all__ = [
+    "analyzer",
+]
 # TODO TODO TODO read the files and restore data structres
 #                to make later plotting super easy!
 
@@ -62,7 +65,7 @@ _create_sequence  = lambda y: [
 ]
 
 
-def main(args):
+def analyzer(args):
     #-----------------------------------------------------------#
     # First, handle arguments
     print(args)
@@ -207,7 +210,6 @@ def main(args):
         with open(output_timestamps_path, 'w') as f_out:
             f_out.write(pformat(timestamps)+'\n')
 
-
     if args.plot:
         #--------------------------------------------------------#
         # PLOT 1: Weak Scaling Plot- Workload Total
@@ -224,5 +226,5 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main()
+    analyzer()
 
