@@ -9,12 +9,34 @@ import anylz
 #import pawutils
 import yaml
 
-#  TODO this is messy wihtout using referenced stamps
-#       --> add to config file
+# TODO TODO TODO read the files and restore data structres
+#                to make later plotting super easy!
+
+#  TODO add stamp references to config file
+#       --> 
 #  TODO ^^ after that ^^, give durations separate from
 #       stamps
 # TODO support multiple workload files
 # TODO deal with missing files
+
+#> KEEP# # TESTS! yay!
+#> KEEP# nested_dict = dict(
+#> KEEP#     a={1,2,3},
+#> KEEP#     b="5",
+#> KEEP#     c=dict(b=10, bbb=dict(butt="6006"))
+#> KEEP# )
+#> KEEP# flatten_nested_dict(nested_dict)
+def flatten_nested_dict(d):
+    new = dict()
+    assert isinstance(d, dict)
+    for k,v in d.items():
+        if isinstance(v, dict):
+            if k in new:
+                print("WARNING: value for existing key {} being overwritten")
+            new.update(flatten_nested_dict(v))
+        else:
+            new.update({k:v})
+    return new
 
 def collect_XY_columns(data, key):
     assert isinstance(data, dict)
@@ -42,6 +64,7 @@ _create_sequence  = lambda y: [
 
 if __name__ == "__main__":
 
+    #-----------------------------------------------------------#
     # First, handle arguments
     parser = anylz.parser()
     args = parser.parse_args()
@@ -65,6 +88,8 @@ if __name__ == "__main__":
         print("Exiting")
         sys.exit(1)
 
+    #-----------------------------------------------------------#
+    # Second, read and set configuration
     with open(args.config, 'r') as f_config:
         #analyze_configuration = pawutils.load_config(args.config)
         analyze_configuration = yaml.safe_load(f_config)['analyze_workload']
@@ -83,6 +108,7 @@ if __name__ == "__main__":
 
 # TODO queryable object
 #class timeline(object):
+    # TODO incorporate all this into config file
     workloadStart = workload_sequence[0]
     workloadStop  = workload_sequence[1]
     taskConnStart = task_sequence[0]
@@ -91,8 +117,31 @@ if __name__ == "__main__":
     taskTaskStop  = task_sequence[-2]
     taskMainStart = task_sequence[2]
     taskMainStop  = task_sequence[-3]
+    interval_timestamp_keys = dict()
+    interval_timestamp_keys['workload'] = workload = [workloadStart, workloadStop]
+    interval_timestamp_keys['taskinit'] = taskinit = [workloadStart, taskConnStart]
+    interval_timestamp_keys['taskstop'] = taskstop = [taskConnStop, workloadStop]
+    interval_timestamp_keys['taskmain'] = taskmain = [taskMainStart, taskMainStop]
+    interval_timestamp_keys['tasktask'] = tasktask = [taskTaskStart, taskTaskStop]
+    interval_timestamp_keys['taskconn'] = taskconn = [taskConnStart, taskConnStop]
+    interval_timestamp_keys['taskboot'] = taskboot = [taskConnStart, taskTaskStart]
+    interval_timestamp_keys['taskpre']  = taskpre  = [taskTaskStart, taskMainStart]
+    interval_timestamp_keys['taskpost'] = taskpost = [taskMainStop, taskTaskStop]
+    interval_timestamp_keys['taskend']  = taskpost = [taskTaskStop, taskConnStop]
+    interval_plotlabel_keys = dict()
+    interval_plotlabel_keys['workload'] = "Wtotal"
+    interval_plotlabel_keys['taskinit'] = "Einit"
+    interval_plotlabel_keys['taskstop'] = "Eclose"
+    interval_plotlabel_keys['taskmain'] = "Tmain"
+    interval_plotlabel_keys['tasktask'] = "Ttotal"
+    interval_plotlabel_keys['taskconn'] = "Elive"
+    interval_plotlabel_keys['taskboot'] = "Tboot"
+    interval_plotlabel_keys['taskpre']  = "Tpre"
+    interval_plotlabel_keys['taskpost'] = "Tpost"
+    interval_plotlabel_keys['taskend']  = "Edisconnect"
 
     n_files_per_task = len(tasks_filenames)
+
     timestamp_keys = {
         #'workload': workload_keys,
         #'task': task_keys,
@@ -102,12 +151,14 @@ if __name__ == "__main__":
 
     assert all([_is_globbable(tfnm) for tfnm in tasks_filenames])
 
-    # Second, initialize data structures
+    #-----------------------------------------------------------#
+    # Third, initialize data structures
     all_timestamps = dict()
     durations = dict()
     analysis = dict()
 
-    # Third, process the data
+    #-----------------------------------------------------------#
+    # Fourth, read in the workload profile data
     for session_directory in session_directories:
 
         all_timestamps[session_directory] = anylz.get_session_timestamps(
@@ -119,39 +170,34 @@ if __name__ == "__main__":
             convert_to_quantity=True,
         )
 
-    # TODO incorporate into config
-    interval_keys = dict()
-    interval_keys['workload'] = workload = [workloadStart, workloadStop]
-    interval_keys['taskinit'] = taskinit = [workloadStart, taskConnStart]
-    interval_keys['taskstop'] = taskstop = [taskConnStop, workloadStop]
-    interval_keys['taskmain'] = taskmain = [taskMainStart, taskMainStop]
-    interval_keys['tasktask'] = tasktask = [taskTaskStart, taskTaskStop]
-    interval_keys['taskconn'] = taskconn = [taskConnStart, taskConnStop]
-    interval_keys['taskboot'] = taskboot = [taskConnStart, taskTaskStart]
-    interval_keys['taskpre']  = taskpre  = [taskTaskStart, taskMainStart]
-    interval_keys['taskpost'] = taskpost = [taskMainStop, taskTaskStop]
-    interval_keys['taskend']  = taskpost = [taskTaskStop, taskConnStop]
-
+    #-----------------------------------------------------------#
+    # Fifth, calculate execution durations
     for session_directory, timestamps in all_timestamps.items():
         # TODO aslso assert there is only 1 timestamp for things like start, stop
         assert len(timestamps['workload']) == 1
 
         durations[session_directory] = durs = dict()
+        [durs.update({interval:list()}) for interval in interval_timestamp_keys]
+
+        for taskstamps in timestamps['task']:
+            wkl_andtask_stamps = {k:v for k,v in timestamps['workload'][0].items()}
+            wkl_andtask_stamps.update(taskstamps)
+            for key, (start, stop) in interval_timestamp_keys.items():
+                durs[key].append(wkl_andtask_stamps[stop][0] - wkl_andtask_stamps[start][0])
+
+    #-----------------------------------------------------------#
+    # Sixth, calculate duration statistics
+    for session_directory, durs in durations.items():
         analysis[session_directory] = anls = dict()
-
-        workloadstamps = timestamps['workload'][0]
-        workload_duration.append(workloadstamps[workloadStop][0] - workloadstamps[workloadStart][0])
-
-        taskstamps = timestamps['task']
-        for tks in taskstamps:
-            taskinit_duration.append(tks[taskConnStart][0] - workloadstamps[workloadStart][0])
-            taskstop_duration.append(workloadstamps[workloadStop][0] - tks[taskConnStop][0])
-            taskmain_duration.append(tks[taskMainStop][0] - tks[taskMainStart][0])
-            tasktask_duration.append(tks[taskTaskStop][0] - tks[taskTaskStart][0])
-            taskconn_duration.append(tks[taskConnStop][0] - tks[taskConnStart][0])
-
         for interval,duration in durs.items():
             anls[interval] = (np.average(duration), np.std(duration))
+
+    #-----------------------------------------------------------#
+    # Seventh, save the analysis
+    for session_directory in session_directories:
+        durs = durations[session_directory]
+        anls = analysis[session_directory]
+        timestamps = all_timestamps[session_directory]
 
         output_profile_path = os.path.join(session_directory, args.output_profile)
         output_analysis_path = os.path.join(session_directory, args.output_analysis)
@@ -168,33 +214,15 @@ if __name__ == "__main__":
 
 
     if args.plot:
-        key_to_label = {
-            taskMain
-        }
-        plot_data = dict()
+        #--------------------------------------------------------#
+        # PLOT 1: Weak Scaling Plot- Workload Total
+        import plot_weak_scaling
+        n_replicates, w_total = list(), list()
+        plot_filepath = '-'.join([args.plot.strip("/"), "weak-scaling.png"])
+        print("plotting here:", plot_filepath)
         for session_directory in session_directories:
             # FIXME clearly need better way
-            n_replicates = len(durations[session_directory]["taskmain"])
-            plot_data[n_replicates] = analysis[session_directory]
-            for key in :
-'''
-        #print(pformat(taskstamps))
-        workflow_durations.append( [nreplicates, workflow_duration] )
-        # FILTER all tasks to get each different type
-        # jsrun launched wrapper tasks
-        wrappertasks = list(filter(lambda ts: all([ts.get(WrapperTaskStarts, None), ts.get(WrapperTaskStops, None)]), taskstamps))
-        wrappertasks = list(filter(lambda ts: all([len(v) < 2 for v in ts.values()]), wrappertasks))
-        # adaptivemd launched task instructions
-        innertasks = list(filter(lambda ts: all([ts.get(InnerTaskStarts, None), ts.get(InnerTaskStops, None)]), taskstamps))
-        innertasks = list(filter(lambda ts: all([len(v) < 2 for v in ts.values()]), innertasks))
-        #print(pformat(wrappertasks))
-        task_durations = list(map(
-            lambda tts: anylz.timestamp_to_sinceepoch(tts[WrapperTaskStops][0]) - anylz.timestamp_to_sinceepoch(tts[WrapperTaskStarts][0]),
-            wrappertasks))
-        task_avgdur = np.mean(task_durations)
-        task_stddur = np.std(task_durations)
-        tasks_durations.append( [nreplicates, task_avgdur, task_stddur] )
+            n_replicates.append(len(durations[session_directory]["taskmain"]))
+            w_total.append(analysis[session_directory][workload])
 
-print(_data_format_template.format("N Tasks", "W Dur", "T Dur,avg", "T Dur,std", "T Ini,avg", "T Ini,std", "T I,D,avg", "T I,D,std", "T I,I,avg", "T I,I,std", "T Clz,avg", "T Clz,std"))
-
-'''
+        plot_weak_scaling.makeplot(n_replicates, w_total, plot_filepath)

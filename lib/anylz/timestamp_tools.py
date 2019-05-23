@@ -38,7 +38,11 @@ def parser():
     )
     parser.add_argument("-p", "--plot",
         default="",
-        help="Relative path to plots file (across given sessions sorted by N replicates)",
+        help="Relative path to plots directory (across given sessions sorted by N replicates)",
+    )
+    parser.add_argument("-P", "--profile_plots",
+        action="store_true",
+        help="Plot workload profile for session found by the given 'session_directories' value",
     )
     parser.add_argument("-v", "--verbose",
         help="NotImplemented: Output verbosity level"
