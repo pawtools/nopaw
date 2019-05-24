@@ -90,16 +90,20 @@ def analyzer(args):
 
     #-----------------------------------------------------------#
     # Second, read and set configuration
+    logger.info("Reading config from file: %s"%args.config)
+
     with open(args.config, 'r') as f_config:
         #analyze_configuration = pawutils.load_config(args.config)
-        analyze_configuration = yaml.safe_load(f_config)['analyze_workload']
+        analyze_configuration = yaml.safe_load(f_config)['analyze']
 
     #workload_filenames = analyze_configuration['workload_filenames']
-    workload_filename   = analyze_configuration['workload_filenames'][0]
-    tasks_folder        = analyze_configuration['tasks_folder']
-    tasks_filenames     = analyze_configuration['tasks_filenames']
-    workload_components = analyze_configuration['workload']
-    task_components     = analyze_configuration['task']
+    workload_filename   = analyze_configuration['workload']['filenames'][0]
+    workload_folder     = analyze_configuration['workload']['folder']
+    workload_components = analyze_configuration['workload']['timestamps']
+
+    tasks_filenames     = analyze_configuration['task']['filenames']
+    tasks_folder        = analyze_configuration['task']['folder']
+    task_components     = analyze_configuration['task']['timestamps']
 
     #workload_keys     = _unpack_stampkeys(workload_components)
     #task_keys         = _unpack_stampkeys(task_components)
@@ -199,9 +203,12 @@ def analyzer(args):
         anls = analysis[session_directory]
         timestamps = all_timestamps[session_directory]
 
-        output_profile_path = os.path.join(session_directory, args.output_profile)
-        output_analysis_path = os.path.join(session_directory, args.output_analysis)
-        output_timestamps_path = os.path.join(session_directory, args.output_timestamps)
+        output_profile_path = os.path.join(
+            session_directory, args.output_profile)
+        output_analysis_path = os.path.join(
+            session_directory, args.output_analysis)
+        output_timestamps_path = os.path.join(
+            session_directory, args.output_timestamps)
 
         with open(output_profile_path, 'w') as f_out:
             f_out.write(pformat(durs)+'\n')
