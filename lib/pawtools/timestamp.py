@@ -9,6 +9,10 @@ from glob import glob
 import datetime
 _epoch = datetime.datetime.utcfromtimestamp(0)
 
+# FIXME how to get same loglevel everywhere
+#from pawtools.logger import get_logger
+#logger = get_logger(__name__)
+
 #del#import difflib
 #del#from functools import reduce
 
@@ -28,6 +32,7 @@ def get_session_timestamps(
     workload_file = os.path.join(session_directory, workload_filename)
     tasks_files = list()
 
+    #logger.info("Workload File is: %s" % workload_file)
     assert os.path.exists(workload_file)
 
     for filename in tasks_filenames:

@@ -72,7 +72,9 @@ def analyzer(args):
 
     #-----------------------------------------------------------#
     # First, handle arguments
-    if not _is_globbable(args.session_directory):
+    # FIXME globbable doesn't work
+    #       shell always expands vars
+    if _is_globbable(args.session_directory):
         # Looking to process MANY   directories
         session_directories = glob(args.session_directory)
 
@@ -84,7 +86,7 @@ def analyzer(args):
         print("session_directories must be single folder or set of folders")
         print("(via glob pattern) containing data for analysis.")
         print("The given value '%s' does not meet the criteria" % 
-            args.session_directories)
+            args.session_directory)
         print("Exiting")
         sys.exit(1)
 
@@ -175,7 +177,8 @@ def analyzer(args):
     #-----------------------------------------------------------#
     # Fifth, calculate execution durations
     for session_directory, timestamps in all_timestamps.items():
-        # TODO aslso assert there is only 1 timestamp for things like start, stop
+        # TODO aslso assert there is only 1 timestamp
+        #      for things like start, stop
         assert len(timestamps['workload']) == 1
 
         durations[session_directory] = durs = dict()
@@ -197,6 +200,7 @@ def analyzer(args):
     # Sixth, calculate duration statistics
     for session_directory, durs in durations.items():
         analysis[session_directory] = anls = dict()
+
         for interval,duration in durs.items():
             anls[interval] = (np.average(duration), np.std(duration))
 
@@ -236,14 +240,13 @@ def analyzer(args):
         n_replicates, w_total = list(), list()
         plot_filepath = '-'.join([args.plot.strip("/"), "weak-scaling.png"])
 
-        logger.info("plotting here: %s"%plot_filepath)
+        logger.info("plotting here: %s" % plot_filepath)
 
         for session_directory in session_directories:
             # FIXME clearly need better way
-            print(analysis[session_directory])
-
             n_replicates.append(len(durations[session_directory]["taskmain"]))
             w_total.append(analysis[session_directory]["workload"][0])
+            n_replicates, w_total = list(sorted(lambda x: x[0], zip(n_replicates, w_total)))
 
         plot_weak_scaling.makeplot(n_replicates, w_total, plot_filepath)
 
