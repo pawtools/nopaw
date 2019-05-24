@@ -28,9 +28,10 @@ def scaling_plot(plt, X, Y, xlim, ylim, xlabel, ylabel, title, filename):
     ax  = fig.add_subplot(111)
     ax.plot(X, Y, linewidth=lw_plot)
     ax.scatter(X, Y, marker='s')
-    format_plot(ax, xlim, ylim, xlabel, ylabel, title, filename)
+    format_plot(plt, ax, xlim, ylim, xlabel, ylabel, title, filename)
 
-def format_plot(ax, xlim, ylim, xlabel, ylabel, title, filename):
+
+def format_plot(plt, ax, xlim, ylim, xlabel, ylabel, title, filename):
     #ax.set_xscale('log')
     ax.set_xlabel(xlabel, fontsize=fs_axlabel)
     ax.set_ylabel(ylabel, fontsize=fs_axlabel)
@@ -52,15 +53,17 @@ def format_plot(ax, xlim, ylim, xlabel, ylabel, title, filename):
         #tick.label.set_rotation(rot_tklabel)
 
     plt.tight_layout()
-    plt.savefig(plot_filename)
+    plt.savefig(filename)
     plt.close()
 
 
 def makeplot(X, Y, plot_filename, config=None):
+
     xmax = np.max(X)
     xlim = [0, xmax + 0.05 * xmax]
 
     if config is None:
+
         xlabel = "N Task Replicates"
         ylabel = "Workload Duration (seconds)"
         title = "Weak Scaling of Workload Duration"
@@ -75,16 +78,20 @@ def makeplot(X, Y, plot_filename, config=None):
     if isinstance(Y, list):
         ymax = np.max(Y)
         ylim = [0, ymax  + 0.05 * ymax]
+
     elif isinstance(Y, np.ndarray):
         ymax = np.max(Y)
         ylim = [0, ymax  + 0.05 * ymax]
+
     elif isinstance(Y, dict):
+
         if len(Y) == 1:
             ylabel, Y = Y.items()[0]
             ymax = np.max(Y)
             ylim = [0, ymax  + 0.05 * ymax]
+
         else:
             pass # keys as legend labels
 
-    scaling_plot(ax, X, Y, xlim, ylim, xlabel, ylabel, title, plot_filename)
+    scaling_plot(plt, X, Y, xlim, ylim, xlabel, ylabel, title, plot_filename)
 

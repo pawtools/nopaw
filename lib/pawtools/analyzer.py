@@ -231,17 +231,19 @@ def analyzer(args):
 
         #--------------------------------------------------------#
         # PLOT 1: Weak Scaling Plot- Workload Total
-        import plot_weak_scaling
+        from pawtools.plots import plot_weak_scaling
 
         n_replicates, w_total = list(), list()
         plot_filepath = '-'.join([args.plot.strip("/"), "weak-scaling.png"])
 
-        print("plotting here:", plot_filepath)
+        logger.info("plotting here: %s"%plot_filepath)
 
         for session_directory in session_directories:
             # FIXME clearly need better way
+            print(analysis[session_directory])
+
             n_replicates.append(len(durations[session_directory]["taskmain"]))
-            w_total.append(analysis[session_directory][workload])
+            w_total.append(analysis[session_directory]["workload"][0])
 
         plot_weak_scaling.makeplot(n_replicates, w_total, plot_filepath)
 
