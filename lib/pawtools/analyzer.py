@@ -147,8 +147,6 @@ def analyzer(args):
     n_files_per_task = len(tasks_filenames)
 
     timestamp_keys = {
-        #'workload': workload_keys,
-        #'task': task_keys,
         'workload': workload_sequence,
         'task': task_sequence,
     }
@@ -181,13 +179,19 @@ def analyzer(args):
         assert len(timestamps['workload']) == 1
 
         durations[session_directory] = durs = dict()
-        [durs.update({interval:list()}) for interval in interval_timestamp_keys]
+        [
+         durs.update({interval:list()})
+         for interval in interval_timestamp_keys
+        ]
 
         for taskstamps in timestamps['task']:
-            wkl_andtask_stamps = {k:v for k,v in timestamps['workload'][0].items()}
-            wkl_andtask_stamps.update(taskstamps)
+            _stamps = {
+                k:v for k,v in timestamps['workload'][0].items()
+            }
+            _stamps.update(taskstamps)
             for key, (start, stop) in interval_timestamp_keys.items():
-                durs[key].append(wkl_andtask_stamps[stop][0] - wkl_andtask_stamps[start][0])
+                durs[key].append(
+                    _stamps[stop][0] - _stamps[start][0])
 
     #-----------------------------------------------------------#
     # Sixth, calculate duration statistics
@@ -199,14 +203,18 @@ def analyzer(args):
     #-----------------------------------------------------------#
     # Seventh, save the analysis
     for session_directory in session_directories:
+
         durs = durations[session_directory]
         anls = analysis[session_directory]
+
         timestamps = all_timestamps[session_directory]
 
         output_profile_path = os.path.join(
             session_directory, args.output_profile)
+
         output_analysis_path = os.path.join(
             session_directory, args.output_analysis)
+
         output_timestamps_path = os.path.join(
             session_directory, args.output_timestamps)
 
@@ -220,12 +228,16 @@ def analyzer(args):
             f_out.write(pformat(timestamps)+'\n')
 
     if args.plot:
+
         #--------------------------------------------------------#
         # PLOT 1: Weak Scaling Plot- Workload Total
         import plot_weak_scaling
+
         n_replicates, w_total = list(), list()
         plot_filepath = '-'.join([args.plot.strip("/"), "weak-scaling.png"])
+
         print("plotting here:", plot_filepath)
+
         for session_directory in session_directories:
             # FIXME clearly need better way
             n_replicates.append(len(durations[session_directory]["taskmain"]))

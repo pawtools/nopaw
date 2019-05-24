@@ -4,3 +4,5 @@ from .analyzer import *
 from .workload import *
 from .verifier import *
 from .logger import *
+
+from .plots import *

@@ -42,7 +42,7 @@ fi
 SOFTWARE_HOME="$(pwd)/software"
 MONGO_VERSION="mongodb-linux-ppc64le-enterprise-rhel71-3.6.11"
 CONDA_VERSION="Miniconda3-latest-Linux-ppc64le.sh"
-PYTHON_REQS="pymongo pyyaml numpy=1.15"
+PYTHON_REQS="pymongo pyyaml numpy=1.15 matplotlib"
 
 #----------------------------------------------------------------------#
 #                              INSTALL STARTS                          #

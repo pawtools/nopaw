@@ -5,6 +5,10 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+__all__ = [
+    "makeplot",
+]
+
 # FIXME TODO point-source config and thne late binding
 #            ie get rid of globals here and get from rc file
 
