@@ -1,0 +1,2 @@
+workload:  "cfg/workload.lsf.yml"
+analyze:  "cfg/analyze.yml"

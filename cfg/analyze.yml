@@ -1,27 +1,26 @@
-analyze:
-  workload:
-    filenames:
-      - "nopaw.out"
+workload:
+  filenames:
+    - "nopaw.out"
 
-    timestamps:
-      - Job:
-        - "a worklow starts"
-        - "a worklow stops"
+  timestamps:
+    - Job:
+      - "a worklow starts"
+      - "a worklow stops"
 
-  task:
-    folder: "executors"
+task:
+  folder: "executors"
 
-    filenames:
-      - "nopaw.executor.*"
-      - "nopaw.connector.*"
+  filenames:
+    - "nopaw.executor.*"
+    - "nopaw.connector.*"
 
-    timestamps:
-      - Conn:
-        - "a connector starts"
-        - "a connector stops"
-      - Task:
-        - "pyscript starting"
-        - "pyscript stopping"
-      - Sync:
-        - "sync starting"
-        - "sync stopping"
+  timestamps:
+    - Conn:
+      - "a connector starts"
+      - "a connector stops"
+    - Task:
+      - "pyscript starting"
+      - "pyscript stopping"
+    - Sync:
+      - "sync starting"
+      - "sync stopping"

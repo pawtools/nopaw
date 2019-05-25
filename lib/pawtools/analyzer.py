@@ -66,17 +66,17 @@ _create_sequence  = lambda y: [
 ]
 
 
-def analyzer(args):
+def analyzer(args, config_filepath):
     logger = get_logger(__name__, "INFO" if args.verbose else "WARNING")
     logger.info(pformat(args))
 
     #-----------------------------------------------------------#
     # Second thing first, read and set configuration
-    logger.info("Reading config from file: %s"%args.config)
+    logger.info("Reading config from file: %s"%config)
 
-    with open(args.config, 'r') as f_config:
+    with open(config_filepath, 'r') as f_config:
         #analyze_configuration = pawutils.load_config(args.config)
-        analyze_configuration = yaml.safe_load(f_config)['analyze']
+        analyze_configuration = yaml.safe_load(f_config)
 
     #workload_filenames = analyze_configuration['workload_filenames']
     #del#workload_folder     = analyze_configuration['workload']['folder']

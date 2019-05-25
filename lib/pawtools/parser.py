@@ -39,10 +39,37 @@ def get_parser():
         action="store_true",
         help="NotImplemented: Output verbosity level"
     )
+    parser.add_argument("-r", "--pawrc",
+        default="rt.pawrc",
+        help="An RC file must be specifed for PAW runtime configuration"
+    )
+    parser.add_argument("-c", "--config",
+        default="cfg/paw.cfg",
+        help="An RC file must be specifed for PAW runtime configuration"
+    )
 
     #   - WORKLOAD
     workload_parser.add_argument("session_directory",
         help="Single directory for 'workload' command",
+    )
+    workload_parser.add_argument("operation",
+        choices=["read","write"],
+        help="Specify one of the preset workload operations",
+    )
+    workload_parser.add_argument("n_replicates",
+        type=int,
+        help="Number of task replicates",
+    )
+    workload_parser.add_argument("n_minutes",
+        type=int,
+        help="Number of minutes for workload LRMS job",
+    )
+    workload_parser.add_argument("datasize",
+        nargs="?",
+        help="Specify one of the preset workload operations",
+    )
+    workload_parser.add_argument("-w", "--wrapping",
+        help="Wrapping used for the main task",
     )
 
     #   - VERIFY
@@ -65,10 +92,6 @@ def get_parser():
     analyze_parser.add_argument("output_profile",
         nargs="?", default="profile.txt",
         help="File name for writing profile data (within each session)"
-    )
-    analyze_parser.add_argument("-c", "--config",
-        default="cfg/analyze.yml",
-        help="Path to a configuration file"
     )
     analyze_parser.add_argument("-p", "--plot",
         default="",

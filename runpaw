@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from pawtools import get_parser, get_logger, analyzer, verifier, workload
+import yaml
+import pawtools
 
 if __name__ == "__main__":
 
@@ -8,15 +9,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print(args)
 
+    config = yaml.safe_load(args.config)
+    command_config_filepath = config[args.command]
+
     logger = get_logger(__name__, "INFO" if args.verbose else "WARNING")
     logger.info("Running PAW command '%s'"%args.command)
     logger.info("with args {}".format(args))
 
-    if args.command == "workload":
-        workload(args)
-
-    elif args.command == "verify":
-        verifier(args)
-
-    elif args.command == "analyze":
-        analyzer(args)
+    # No changes needed here when expanding command set
+    paw_function = getattr(pawtools, args.command)
+    paw_function(args, command_config_filepath)
