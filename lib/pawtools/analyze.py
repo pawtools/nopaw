@@ -68,11 +68,15 @@ _create_sequence  = lambda y: [
 
 def analyze(args, config_filepath):
     logger = get_logger(__name__, "INFO" if args.verbose else "WARNING")
-    logger.info(pformat(args))
+    # FIXME the level input broken right now
+    logger = get_logger(__name__, "INFO" if args.verbose else "WARNING")
+    #logger = pawtools.get_logger(__name__, "INFO")
+    logger.setLevel("INFO" if args.verbose else "WARNING")
+    logger.critical("LOGLEVEL set to: {}".format(logger.level))
 
     #-----------------------------------------------------------#
     # Second thing first, read and set configuration
-    logger.info("Reading config from file: %s"%config)
+    logger.info("Reading config from file: %s"%config_filepath)
 
     with open(config_filepath, 'r') as f_config:
         #analyze_configuration = pawutils.load_config(args.config)
@@ -106,21 +110,21 @@ def analyze(args, config_filepath):
                 session_directories.append(os.path.join(args.session_directory, d))
 
         if len(session_directories) == 0:
-            print("session_directories must be single folder or top of")
-            print("a set of folders containing data for analysis.")
-            print("The given value '%s' does not lead to any folders" % 
+            logger.info("session_directories must be single folder or top of")
+            logger.info("a set of folders containing data for analysis.")
+            logger.info("The given value '%s' does not lead to any folders" % 
                 args.session_directory)
-            print("or subfolders with the workflow file '%s' specified" %
+            logger.info("or subfolders with the workflow file '%s' specified" %
                 workflow_filename)
-            print("by the configuration, Exiting")
+            logger.info("by the configuration, Exiting")
             sys.exit(1)
 
     else:
-        print("session_directories must be single folder or top of")
-        print("a set of folders containing data for analysis.")
-        print("The given value '%s' does not meet the criteria" % 
+        logger.info("session_directories must be single folder or top of")
+        logger.info("a set of folders containing data for analysis.")
+        logger.info("The given value '%s' does not meet the criteria" % 
             args.session_directory)
-        print("Exiting")
+        logger.info("Exiting")
         sys.exit(1)
 
     #-----------------------------------------------------------#

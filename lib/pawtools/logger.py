@@ -1,6 +1,9 @@
 import os
 import logging
 
+# FIXME the level handling broke probably
+#       when outer loop changed, refixitup
+
 __all__ = [
     "get_logger",
 ]

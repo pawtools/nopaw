@@ -3,13 +3,18 @@
 import yaml
 import pawtools
 
+
 if __name__ == "__main__":
 
     parser = pawtools.get_parser()
     args = parser.parse_args()
+    print(args)
 
+    # FIXME the level input broken right now
     logger = pawtools.get_logger(__name__, "INFO" if args.verbose else "WARNING")
     #logger = pawtools.get_logger(__name__, "INFO")
+    logger.setLevel("INFO" if args.verbose else "WARNING")
+    logger.critical("LOGLEVEL set to: {}".format(logger.level))
     logger.info("Running PAW command '%s'"%args.command)
     logger.info("with args {}".format(args))
 

@@ -1,8 +1,8 @@
 from .timestamp import *
 from .parser import *
-from .analyzer import *
+from .analyze import *
 from .workload import *
-from .verifier import *
+from .verify import *
 from .logger import *
 
 from .plots import *
