@@ -44,7 +44,7 @@ def get_parser():
         help="An RC file must be specifed for PAW runtime configuration"
     )
     parser.add_argument("-c", "--config",
-        default="cfg/paw.cfg",
+        default="cfg/paw.yml",
         help="An RC file must be specifed for PAW runtime configuration"
     )
 

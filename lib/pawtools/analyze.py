@@ -11,7 +11,7 @@ from pawtools.timestamp import get_session_timestamps
 from pawtools.logger import get_logger
 
 __all__ = [
-    "analyzer",
+    "analyze",
 ]
 # TODO TODO TODO read the files and restore data structres
 #                to make later plotting super easy!
@@ -66,7 +66,7 @@ _create_sequence  = lambda y: [
 ]
 
 
-def analyzer(args, config_filepath):
+def analyze(args, config_filepath):
     logger = get_logger(__name__, "INFO" if args.verbose else "WARNING")
     logger.info(pformat(args))
 

@@ -5,16 +5,19 @@ import pawtools
 
 if __name__ == "__main__":
 
-    parser = get_parser()
+    parser = pawtools.get_parser()
     args = parser.parse_args()
-    print(args)
 
-    config = yaml.safe_load(args.config)
-    command_config_filepath = config[args.command]
-
-    logger = get_logger(__name__, "INFO" if args.verbose else "WARNING")
+    logger = pawtools.get_logger(__name__, "INFO" if args.verbose else "WARNING")
+    #logger = pawtools.get_logger(__name__, "INFO")
     logger.info("Running PAW command '%s'"%args.command)
     logger.info("with args {}".format(args))
+
+    with open(args.config, 'r') as f_config:
+        config = yaml.safe_load(f_config)
+
+    logger.info("PAW Config: {}".format(config))
+    command_config_filepath = config[args.command]
 
     # No changes needed here when expanding command set
     paw_function = getattr(pawtools, args.command)
