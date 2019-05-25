@@ -71,27 +71,7 @@ def analyzer(args):
     logger.info(pformat(args))
 
     #-----------------------------------------------------------#
-    # First, handle arguments
-    # FIXME globbable doesn't work
-    #       shell always expands vars
-    if _is_globbable(args.session_directory):
-        # Looking to process MANY   directories
-        session_directories = glob(args.session_directory)
-
-    elif os.path.exists(args.session_directory):
-        # Looking to process SINGLE directories
-        session_directories = [args.session_directory]
-
-    else:
-        print("session_directories must be single folder or set of folders")
-        print("(via glob pattern) containing data for analysis.")
-        print("The given value '%s' does not meet the criteria" % 
-            args.session_directory)
-        print("Exiting")
-        sys.exit(1)
-
-    #-----------------------------------------------------------#
-    # Second, read and set configuration
+    # Second thing first, read and set configuration
     logger.info("Reading config from file: %s"%args.config)
 
     with open(args.config, 'r') as f_config:
@@ -99,8 +79,8 @@ def analyzer(args):
         analyze_configuration = yaml.safe_load(f_config)['analyze']
 
     #workload_filenames = analyze_configuration['workload_filenames']
+    #del#workload_folder     = analyze_configuration['workload']['folder']
     workload_filename   = analyze_configuration['workload']['filenames'][0]
-    workload_folder     = analyze_configuration['workload']['folder']
     workload_components = analyze_configuration['workload']['timestamps']
 
     tasks_filenames     = analyze_configuration['task']['filenames']
@@ -112,6 +92,39 @@ def analyzer(args):
     workload_sequence = _create_sequence(workload_components)
     task_sequence     = _create_sequence(task_components)
 
+    #-----------------------------------------------------------#
+    # First thing second, handle arguments (use config a bit)
+    if os.path.isfile(os.path.join(args.session_directory, workload_filename)):
+        # Looking to process SINGLE directories
+        session_directories = [args.session_directory]
+
+    elif os.path.isdir(args.session_directory):
+        # Looking to process MANY   directories
+        session_directories = list()
+        for d in os.listdir(args.session_directory):
+            if os.path.isfile(os.path.join(args.session_directory, d, workload_filename)):
+                session_directories.append(os.path.join(args.session_directory, d))
+
+        if len(session_directories) == 0:
+            print("session_directories must be single folder or top of")
+            print("a set of folders containing data for analysis.")
+            print("The given value '%s' does not lead to any folders" % 
+                args.session_directory)
+            print("or subfolders with the workflow file '%s' specified" %
+                workflow_filename)
+            print("by the configuration, Exiting")
+            sys.exit(1)
+
+    else:
+        print("session_directories must be single folder or top of")
+        print("a set of folders containing data for analysis.")
+        print("The given value '%s' does not meet the criteria" % 
+            args.session_directory)
+        print("Exiting")
+        sys.exit(1)
+
+    #-----------------------------------------------------------#
+    # Second thing again, configuring processing setup
 # TODO queryable object
 #class timeline(object):
     # TODO incorporate all this into config file
@@ -243,12 +256,22 @@ def analyzer(args):
         logger.info("plotting here: %s" % plot_filepath)
 
         for session_directory in session_directories:
-            # FIXME clearly need better way
+            # FIXME clearly need better way to specify n replicates
+            #       --> read from workflow file above,
+            #           tracking errors and such as well
             n_replicates.append(len(durations[session_directory]["taskmain"]))
             w_total.append(analysis[session_directory]["workload"][0])
-            n_replicates, w_total = list(sorted(lambda x: x[0], zip(n_replicates, w_total)))
 
+        n_replicates, w_total = list(zip(*list(sorted(
+            zip(n_replicates, w_total),
+            key=lambda x: x[0]
+        ))))
+        logger.info(
+            "Plotting Weak Scaling results:\nN Replicates: {0}\nW Duration: {1}".format(
+            n_replicates, w_total)
+        )
         plot_weak_scaling.makeplot(n_replicates, w_total, plot_filepath)
+        # TODO MORE PLOTS!
 
 
 if __name__ == "__main__":

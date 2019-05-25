@@ -5,6 +5,10 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+from ..logger import get_logger
+
+logger = get_logger(__name__)
+
 __all__ = [
     "makeplot",
 ]
@@ -75,7 +79,7 @@ def makeplot(X, Y, plot_filename, config=None):
     elif os.path.exists(config):
         pass
 
-    if isinstance(Y, list):
+    if isinstance(Y, (tuple,list)):
         ymax = np.max(Y)
         ylim = [0, ymax  + 0.05 * ymax]
 
@@ -92,6 +96,10 @@ def makeplot(X, Y, plot_filename, config=None):
 
         else:
             pass # keys as legend labels
+
+    else:
+        logger.warning("Could not understand what Y was: {}".format(Y))
+        raise Exception
 
     scaling_plot(plt, X, Y, xlim, ylim, xlabel, ylabel, title, plot_filename)
 

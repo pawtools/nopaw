@@ -1,7 +1,5 @@
 analyze:
   workload:
-    folder: "sessions"
-
     filenames:
       - "nopaw.out"
 

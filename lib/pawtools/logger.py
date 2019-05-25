@@ -1,3 +1,4 @@
+import os
 import logging
 
 __all__ = [
@@ -48,7 +49,7 @@ def get_logger(logname, loglevel=None, logfile=False):
         loglevel = logging.WARNING
 
     formatter = logging.Formatter(
-        '%(asctime)s ::::: %(name)s ::::: %(levelname)s |||||   %(message)s'
+        '%(asctime)s :: %(name)s :: %(levelname)s || %(message)s'
     )
 
     logging.basicConfig(level=loglevel)#, format=formatter)
