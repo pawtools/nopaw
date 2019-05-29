@@ -1,11 +1,14 @@
 '''
 '''
 
+
 import argparse
+
 
 __all__ = [
     "get_parser",
 ]
+
 
 def get_parser():
     # TOP LEVEL parser
@@ -40,11 +43,15 @@ def get_parser():
         help="NotImplemented: Output verbosity level"
     )
     parser.add_argument("-r", "--pawrc",
-        default="rt.pawrc",
+        default="paw.bashrc",
         help="An RC file must be specifed for PAW runtime configuration"
     )
     parser.add_argument("-c", "--config",
         default="cfg/paw.yml",
+        help="An RC file must be specifed for PAW runtime configuration"
+    )
+    parser.add_argument("-j", "--job_name",
+        default="paw",
         help="An RC file must be specifed for PAW runtime configuration"
     )
 

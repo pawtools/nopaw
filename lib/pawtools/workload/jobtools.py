@@ -333,7 +333,8 @@ class JobBuilder(object):
         if self.job_configuration:
             # TODO differentiate required vs optional
             #      config keys with 'get' vs hard hash
-            jobopts = self.job_configuration["job"]
+            print(pformat(self.job_configuration))
+            jobopts = self.job_configuration["workload"]
             launcher = jobopts["launcher"]
             launch_args = ' '.join(jobopts["arguments"])
             launch_opts = cli_args_from_dict(jobopts["options"])
@@ -359,13 +360,28 @@ class JobBuilder(object):
             self._script = '\n\n'.join(
                 [script_template, main_line])
 
-    def load(self, yaml_config):
+    def load(self, yaml_config, require_on_load=False):
 
         with open(yaml_config, 'r') as fyml:
             config = yaml.safe_load(fyml)
 
         print(pformat(config))
+
+        if require_on_load:
+            # Should raise exception if not
+            # all required fields filled
+            self.check_ready_base(config)
+
+        self._job_configuration = config
+        self._read_config_keys()
+
+    def check_ready_base(self, config=None):
+
+        if config is None:
+            config = self._job_configuration
+
         for r in self.__class__._required_:
+
             try:
                 assert r in config
                 assert all([
@@ -377,9 +393,6 @@ class JobBuilder(object):
                 print("Missing a required value or subconfig for: '%s'" % r)
                 print("from the config file: '%s'" % yaml_config)
                 raise ae
-
-        self._job_configuration = config
-        self._read_config_keys()
 
     def configure_workload(self, config_dict):
         '''Give a configuration to bind missing parameters.

@@ -1,3 +1,4 @@
+user:     "cfg/user.yml"
 workload: "cfg/workload.lsf.yml"
 analyze:  "cfg/analyze.yml"
 resource: "cfg/resource.summit.yml"

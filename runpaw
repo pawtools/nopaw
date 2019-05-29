@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import yaml
+from pprint import pformat
+
 import pawtools
 
 
@@ -21,7 +23,7 @@ if __name__ == "__main__":
     with open(args.config, 'r') as f_config:
         config = yaml.safe_load(f_config)
 
-    logger.info("PAW Config: {}".format(config))
+    logger.info("PAW Config: {}".format(pformat(config)))
     command_config_filepath = config[args.command]
 
     # No changes needed here when expanding command set

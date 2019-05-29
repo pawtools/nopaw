@@ -48,7 +48,7 @@ PYTHON_REQS="pymongo pyyaml numpy=1.15 matplotlib"
 #                              INSTALL STARTS                          #
 #----------------------------------------------------------------------#
 CWD="$(pwd)"
-SHPROFILE="$CWD/rt.pawrc"
+SHPROFILE="$CWD/paw.bashrc"
 
 # CREATE PLATFORM SPACE:
 mkdir -p "$CWD/sessions"
