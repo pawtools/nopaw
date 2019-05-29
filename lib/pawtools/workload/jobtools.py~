@@ -3,14 +3,14 @@ Authors: John Ossyra
 Tools for executing workload. 
 '''
 import sys
-sys.dont_write_bytecode = True
-
 import os
 import subprocess
 import shlex
 import yaml
 
 from string import Formatter
+
+from pprint import pformat
 
 __all__ = [
     "MongoInstance",
@@ -281,8 +281,16 @@ class JobBuilder(object):
     '''
     _live_ = True
     _required_ = {
-        "job":  {"launcher"}, 
+        # FIXME go back to job for job stuff when
+        #"job":  {"launcher"}, 
+        "workload":  {"launcher"}, 
+        #       renaming to fix workload name overload.
+        #       task seems to be fine
         "task": {"launcher","resource","main"},
+    }
+    # TODO 
+    _all_ = {
+        
     }
 
     def __init__(self):
@@ -354,14 +362,21 @@ class JobBuilder(object):
     def load(self, yaml_config):
 
         with open(yaml_config, 'r') as fyml:
-            config = yaml.load(fyml)
+            config = yaml.safe_load(fyml)
 
+        print(pformat(config))
         for r in self.__class__._required_:
-            assert r in config
-            assert all([
-                _r in config[r] for _r
-                in self.__class__._required_[r]
-            ])
+            try:
+                assert r in config
+                assert all([
+                    _r in config[r] for _r
+                    in self.__class__._required_[r]
+                ])
+
+            except AssertionError as ae:
+                print("Missing a required value or subconfig for: '%s'" % r)
+                print("from the config file: '%s'" % yaml_config)
+                raise ae
 
         self._job_configuration = config
         self._read_config_keys()

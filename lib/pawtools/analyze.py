@@ -10,9 +10,10 @@ import numpy as np
 from pawtools.timestamp import get_session_timestamps
 from pawtools.logger import get_logger
 
-__all__ = [
+__runtime__ = [
     "analyze",
 ]
+
 # TODO TODO TODO read the files and restore data structres
 #                to make later plotting super easy!
 
@@ -191,6 +192,8 @@ def analyze(args, config_filepath):
             convert_to_quantity=True,
         )
 
+    logger.info("All Timestamps:\n{}".format(pformat(all_timestamps)))
+
     #-----------------------------------------------------------#
     # Fifth, calculate execution durations
     for session_directory, timestamps in all_timestamps.items():
@@ -270,14 +273,12 @@ def analyze(args, config_filepath):
             zip(n_replicates, w_total),
             key=lambda x: x[0]
         ))))
+
         logger.info(
             "Plotting Weak Scaling results:\nN Replicates: {0}\nW Duration: {1}".format(
             n_replicates, w_total)
         )
+
         plot_weak_scaling.makeplot(n_replicates, w_total, plot_filepath)
         # TODO MORE PLOTS!
-
-
-if __name__ == "__main__":
-    analyzer()
 

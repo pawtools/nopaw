@@ -25,5 +25,12 @@ if __name__ == "__main__":
     command_config_filepath = config[args.command]
 
     # No changes needed here when expanding command set
-    paw_function = getattr(pawtools, args.command)
-    paw_function(args, command_config_filepath)
+    paw_runtime = pawtools.runtimes.get(args.command, None)
+    if paw_runtime is not None:
+        logger.info("Retrieved this runtime function: {}".format(paw_runtime))
+        paw_runtime(args, command_config_filepath)
+    else:
+        logger.error("Could not find runtime function '%s'" % args.command)
+        logger.error("Available runtime functions are:\n{}".format(
+            list(paw_runtime.keys())
+        ))

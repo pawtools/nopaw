@@ -64,13 +64,12 @@ def get_parser():
         type=int,
         help="Number of minutes for workload LRMS job",
     )
-    workload_parser.add_argument("datasize",
-        nargs="?",
-        help="Specify one of the preset workload operations",
-    )
-    workload_parser.add_argument("-w", "--wrapping",
-        help="Wrapping used for the main task",
-    )
+  # TODO task-opts catch all as last
+  #      --> processed by command runtime
+  #  workload_parser.add_argument("datasize",
+  #      nargs="?",
+  #      help="Specify one of the preset workload operations",
+  #  )
 
     #   - VERIFY
     verify_parser.add_argument("session_directory",

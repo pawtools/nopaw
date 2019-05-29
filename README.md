@@ -12,6 +12,8 @@
        each of these 3 test modes should be run with
        each of the task/operation types
 
+- TODO the workload module/runtime function same-name
+       must be fixed
 - TODO new operation types to test file writing via:
        bash wrapper, python script (+subprocess)
 - TODO same order of positional arguments

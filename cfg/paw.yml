@@ -1,2 +1,12 @@
-workload:  "cfg/workload.lsf.yml"
+workload: "cfg/workload.lsf.yml"
 analyze:  "cfg/analyze.yml"
+resource: "cfg/resource.summit.yml"
+
+# TODO alias's for task names
+tasks:
+    write-simple:  "cfg/write-simple.yml"
+    read-simple:   "cfg/write-simple.yml"
+    write-subproc: "cfg/write-subproc.yml"
+    read-subproc:  "cfg/write-subproc.yml"
+    write-bash:    "cfg/write-bash.yml"
+    read-bash:     "cfg/write-bash.yml"

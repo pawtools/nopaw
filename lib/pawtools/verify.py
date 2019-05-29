@@ -5,11 +5,11 @@ import os
 from pprint import pformat
 from pymongo import MongoClient
 
-__all__ = [
-    "verifier",
+__runtime__ = [
+    "verify",
 ]
 
-def verifier():
+def verify():
     pass
 
 if __name__ == "__main__":
