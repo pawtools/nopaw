@@ -10,21 +10,12 @@ workload:
   arguments:
     - "-alloc_flags \"gpumps smt4\""
 
-  # TODO export this functionality to use things
-  #      like pawtools.MongoInstance and such to
-  #      simplify creation of complex environment
-  #      -- exemplify both / equivalence in docs
-  #      -- the kooky situation with summit ulimits
-  #         justifies avoidign this for now :)
   script:
     - "module unload python"
     - "export OMP_NUM_THREADS={threads_per_task}"
     - "source {shprofile}"
     - "which python"
-    - "NNODES={n_nodes}"
-    #or
-    #- "NNODES=$(echo \"`echo $LSB_MCPU_HOSTS | tr ' ' '\n' | sort -u | wc -l` - 3\" | bc)"
-    - "
+
 
 task:
   launcher: "jsrun"

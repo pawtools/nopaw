@@ -11,12 +11,14 @@ __all__ = [
 
 
 def get_parser():
+    #-------------------------------------------------#
     # TOP LEVEL parser
     # TODO tricks to get monolithic help
     parser = argparse.ArgumentParser(
         description="Run 'workload', 'verify', or 'analyze' command with PAW",
         add_help=False,
     )
+    #-------------------------------------------------#
     # DEFINE subparsers for workload execution,
     #        verification, and analysis paw commands
     subparsers = parser.add_subparsers(
@@ -36,6 +38,7 @@ def get_parser():
         description="Analyze (1 or a series of) nopaw workloads",
     )
 
+    #-------------------------------------------------#
     # DEFINE arguments
     #   - TOP
     parser.add_argument("-v", "--verbose",
@@ -55,13 +58,13 @@ def get_parser():
         help="An RC file must be specifed for PAW runtime configuration"
     )
 
+    #-------------------------------------------------#
     #   - WORKLOAD
     workload_parser.add_argument("session_directory",
         help="Single directory for 'workload' command",
     )
-    workload_parser.add_argument("operation",
-        choices=["read","write"],
-        help="Specify one of the preset workload operations",
+    workload_parser.add_argument("task_name",
+        help="Specify the desired task (must have matching config task.<task_name>.yml)",
     )
     workload_parser.add_argument("n_replicates",
         type=int,
@@ -78,11 +81,13 @@ def get_parser():
   #      help="Specify one of the preset workload operations",
   #  )
 
+    #-------------------------------------------------#
     #   - VERIFY
     verify_parser.add_argument("session_directory",
         help="Single directory for 'verify' command",
     )
 
+    #-------------------------------------------------#
     #   - ANALYZE
     analyze_parser.add_argument("session_directory",
         help="Single or glob pattern for 'analyze' command."
@@ -108,4 +113,6 @@ def get_parser():
         help="Plot workload profile for session found by the given 'session_directories' value",
     )
 
+    #-------------------------------------------------#
+    #   - DONE
     return parser

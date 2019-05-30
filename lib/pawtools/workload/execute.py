@@ -1,9 +1,11 @@
 
 import os
+import yaml
+from pprint import pformat
 import itertools
 
 from .jobtools import JobBuilder, SessionMover#, MongoInstance
-
+from ..logger import get_logger
 
 # PAW Will use runtimes listed
 # to import, 
@@ -11,7 +13,34 @@ __runtime__ = [
     "workload",
 ]
 
-def workload(args, config_filepath):
+# TODO use these to navigate and build full runtime configuration
+_required_configs = [
+    "resource",  # description of node layout, queues, etc
+    "sessions",  # prefix for all runtime session outputs
+    "user",      # account information, ie allocation
+    "workload",  # launch configuration
+]
+
+def workload(args, workload_config_filepath):
+
+    # FIXME the loglevel input broken right now
+    logger = get_logger(__name__, "INFO" if args.verbose else "WARNING")
+    #logger = pawtools.get_logger(__name__, "INFO")
+    logger.setLevel("INFO" if args.verbose else "WARNING")
+    logger.critical("LOGLEVEL set to: {}".format(logger.level))
+    logger.info("Running PAW command '%s'"%args.command)
+    logger.info("with args {}".format(args))
+
+    # FIXME FIXME
+    # TODO need a persistent, accumulating config
+    # TODO where should it be built? top, here?
+    with open(args.config, 'r') as f_config:
+        paw_config = yaml.safe_load(f_config)
+
+    task_config_filepath = paw_config["tasks"].get(args.task_name, None)
+
+    if not task_config_filepath:
+        raise Exception("No task configuration for given option: %s" % args.task_name)
 
     fwd = os.getcwd()
     session_mover = SessionMover(fwd)
@@ -61,7 +90,8 @@ def workload(args, config_filepath):
     #  session_mover.use_current()
 
     jb = JobBuilder()
-    jb.load(config_filepath)
+    jb.load(workload_config_filepath)
+    jb.load(task_config_filepath)
     jb.configure_workload(jobconfig)
 
     next_session_directory = session_mover.current

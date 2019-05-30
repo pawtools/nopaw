@@ -1,0 +1,3 @@
+allocation: "bif112"
+limit:      "5000"
+formula:    "{nnodes}*{minutes}"

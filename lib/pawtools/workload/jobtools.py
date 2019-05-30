@@ -298,9 +298,9 @@ class JobBuilder(object):
         super(JobBuilder, self).__init__()
 
         self._job_launcher = None
-        self._job_configuration = None
         self._script = None
         self._keys = dict()
+        self._job_configuration = dict()
 
     @property
     def configured(self):
@@ -333,7 +333,6 @@ class JobBuilder(object):
         if self.job_configuration:
             # TODO differentiate required vs optional
             #      config keys with 'get' vs hard hash
-            print(pformat(self.job_configuration))
             jobopts = self.job_configuration["workload"]
             launcher = jobopts["launcher"]
             launch_args = ' '.join(jobopts["arguments"])
@@ -365,14 +364,18 @@ class JobBuilder(object):
         with open(yaml_config, 'r') as fyml:
             config = yaml.safe_load(fyml)
 
-        print(pformat(config))
-
         if require_on_load:
             # Should raise exception if not
             # all required fields filled
             self.check_ready_base(config)
 
-        self._job_configuration = config
+        # FIXME recursive safe-update required here...
+        for k,v in config.items():
+            if k in self._job_configuration:
+                self._job_configuration[k].update(v)
+            else:
+                self._job_configuration[k] = v
+
         self._read_config_keys()
 
     def check_ready_base(self, config=None):
