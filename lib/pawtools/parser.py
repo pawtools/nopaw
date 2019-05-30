@@ -74,6 +74,10 @@ def get_parser():
         type=int,
         help="Number of minutes for workload LRMS job",
     )
+    workload_parser.add_argument("-d", "--db_location",
+        default="mongo/",
+        help="Number of minutes for workload LRMS job",
+    )
   # TODO task-opts catch all as last
   #      --> processed by command runtime
   #  workload_parser.add_argument("datasize",

@@ -25,6 +25,8 @@ workload:
     - "which python"
     - "NNODES={n_nodes}"
     - "NETDEVICE=\"ib0\""
+    - "DBNAME=testdb"
+    - "DBLOCATION={db_location}"
     #or
     #- "NNODES=$(echo \"`echo $LSB_MCPU_HOSTS | tr ' ' '\n' | sort -u | wc -l` - 3\" | bc)"
     #TODO config per task

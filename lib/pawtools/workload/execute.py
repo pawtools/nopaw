@@ -51,6 +51,9 @@ def workload(args, workload_config_filepath):
     # Options commonly changed
     n_tasks = args.n_replicates
     job_name = args.job_name
+    minutes = args.n_minutes
+    # FIXME database/environment model not good
+    db_location = args.db_location
     # TODO add these to options commonly changed config
     mpi_per_task = 1
     gpu_per_task = 1
@@ -74,11 +77,13 @@ def workload(args, workload_config_filepath):
         threads_per_rank = threads_per_rank,
     
         #Job and launcher Options
+        # FIXME TODO move and replace source as appropriate
         allocation = 'bif112',
-        minutes = 10,
+        minutes = minutes,
         n_nodes = 1,
-        rcfile = "/gpfs/alpine/bif112/proj-shared/tests-summit/tests-gromacs/testrc.bash",
     
+        # TODO catch-all final options for task-specific
+        #      should be processed here
         #Task Options
         mdsystem = "/gpfs/alpine/bif112/proj-shared/gromacs_systems/large-1M/md_RUNME.tpr",
         nsteps = 10000,
@@ -88,18 +93,25 @@ def workload(args, workload_config_filepath):
     #  # Moves us to a new, unique subdirectory
     # TODO needs to capture env and do file linking
     #  session_mover.use_current()
+    next_session_directory = session_mover.current
+    os.mkdir(next_session_directory)
+    os.chdir(next_session_directory)
+
 
     jb = JobBuilder()
     jb.load(workload_config_filepath)
     jb.load(task_config_filepath)
-    jb.configure_workload(jobconfig)
 
-    next_session_directory = session_mover.current
-    os.mkdir(next_session_directory)
-    os.chdir(next_session_directory)
+    # TODO this only makes sense for single workload
+    #      applications, ie here every session gets own
+    #      database, FIXME via expanded environment scheme
+    jobconfig.update(dict(
+        db_location = os.path.join(next_session_directory, db_location
+    ))
+    jb.configure_workload(jobconfig)
 
     jb.launch_job()
 
     # Move logs that were left in first working
     # directory to the session's subdirectory
-    session_mover.go_back(capture=True)
+    #session_mover.go_back(capture=True)
