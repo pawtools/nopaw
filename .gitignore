@@ -10,3 +10,7 @@ software/*
 # Python compiled bytecode
 **/__pycache__
 **/*.pyc
+
+# Emacs files
+*~
+\#*
