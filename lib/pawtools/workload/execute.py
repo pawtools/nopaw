@@ -2,7 +2,6 @@
 import os
 import yaml
 from pprint import pformat
-import itertools
 
 from .jobtools import JobBuilder, SessionMover#, MongoInstance
 from ..logger import get_logger
@@ -21,7 +20,7 @@ _required_configs = [
     "workload",  # launch configuration
 ]
 
-def workload(args, workload_config_filepath):
+def workload(args, paw_home):
 
     # FIXME the loglevel input broken right now
     logger = get_logger(__name__, "INFO" if args.verbose else "WARNING")
@@ -31,23 +30,28 @@ def workload(args, workload_config_filepath):
     logger.info("Running PAW command '%s'"%args.command)
     logger.info("with args {}".format(args))
 
+    paw_config_location = paw_home / args.config
     # FIXME FIXME
     # TODO need a persistent, accumulating config
     # TODO where should it be built? top, here?
-    with open(args.config, 'r') as f_config:
+    with open(paw_config_location, 'r') as f_config:
         paw_config = yaml.safe_load(f_config)
 
-    task_config_filepath = paw_config["tasks"].get(args.task_name, None)
+    workload_config_filename = paw_config["workload"]
+    task_config_filename = paw_config["tasks"].get(args.task_name, None)
 
-    if not task_config_filepath:
+    if not task_config_filename:
         raise Exception("No task configuration for given option: %s" % args.task_name)
 
-    fwd = os.getcwd()
-    session_mover = SessionMover(fwd)
+    sessions_home = paw_home / paw_config["sessions"]
+    task_config_location = paw_home / task_config_filename
+    workload_config_location = paw_home / workload_config_filename
+    shprofile = paw_home / args.pawrc
+
+    session_mover = SessionMover(sessions_home)
 
     # Set all the needed options from config fields
     # Paw Runtime
-    shprofile = args.pawrc
     # Options commonly changed
     n_tasks = args.n_replicates
     job_name = args.job_name
@@ -97,16 +101,15 @@ def workload(args, workload_config_filepath):
     os.mkdir(next_session_directory)
     os.chdir(next_session_directory)
 
-
     jb = JobBuilder()
-    jb.load(workload_config_filepath)
-    jb.load(task_config_filepath)
+    jb.load(workload_config_location)
+    jb.load(task_config_location)
 
     # TODO this only makes sense for single workload
     #      applications, ie here every session gets own
     #      database, FIXME via expanded environment scheme
     jobconfig.update(dict(
-        db_location = os.path.join(next_session_directory, db_location
+        db_location = os.path.join(next_session_directory, db_location)
     ))
     jb.configure_workload(jobconfig)
 

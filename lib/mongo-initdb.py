@@ -10,6 +10,7 @@ print("pyscript recieved args:\n{}".format(
     sys.argv))
 
 if __name__ == "__main__":
+
     dbhost = sys.argv[1]
     dbport = sys.argv[2]
     dbname = sys.argv[3]

@@ -27,6 +27,7 @@ else
   fi
 fi
 
+echo "launch_amongod GOIGN TO MAKE DIR $DBPATH"
 mkdir -p $DBPATH
 mkdir $DBPATH/db
 mkdir $DBPATH/socket

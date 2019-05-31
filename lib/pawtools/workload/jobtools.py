@@ -193,7 +193,7 @@ class SessionMover(object):
     
     """
     _base = None
-    _prefix = 'sessions'
+    _prefix = ''  # TODO set me from config
     _first = 0
     _capture = '.log'
 
@@ -276,9 +276,10 @@ class SessionMover(object):
 class JobBuilder(object):
     '''Create an LRMS job to acquire resources for a workload.
     JobBuilder reads configuration from a yaml file. Two top-level
-    fields are required: "job" and "task". Options for each are
+    fields are required: "workload" and "task". Options for each are
     built into the actual LRMS job.
     '''
+    # set to False to get results without launch
     _live_ = True
     _required_ = {
         # FIXME go back to job for job stuff when
@@ -287,10 +288,6 @@ class JobBuilder(object):
         #       renaming to fix workload name overload.
         #       task seems to be fine
         "task": {"launcher","resource","main"},
-    }
-    # TODO 
-    _all_ = {
-        
     }
 
     def __init__(self):
@@ -303,7 +300,7 @@ class JobBuilder(object):
         self._job_configuration = dict()
 
     @property
-    def configured(self):
+    def ready(self):
         return all([
             v is not None for v
             in flatten_list(flatten_dict(self._keys))
@@ -331,12 +328,15 @@ class JobBuilder(object):
             return
 
         if self.job_configuration:
+            # FIXME a lot of craziness down there
+            #       -- clarify types, required, sequence
             # TODO differentiate required vs optional
             #      config keys with 'get' vs hard hash
             jobopts = self.job_configuration["workload"]
             launcher = jobopts["launcher"]
             launch_args = ' '.join(jobopts["arguments"])
             launch_opts = cli_args_from_dict(jobopts["options"])
+
             job_launcher = ' '.join(
                 [launcher, launch_args, launch_opts])
 
@@ -344,20 +344,36 @@ class JobBuilder(object):
             self._job_launcher = ' '.join([job_launcher, job_script])
 
             taskopts = self.job_configuration["task"]
+
             launcher = taskopts["launcher"]
             launch_args = cli_args_from_dict(taskopts["resource"])
             task_launcher = ' '.join([launcher, launch_args])
-            main_exec = taskopts["main"]["executable"]
+
+            main_exec = taskopts["main"]["executable"][0]
             main_args = ' '.join(taskopts["main"]["arguments"])
-            main_opts = cli_args_from_dict(taskopts["main"]["options"])
-            main_line = ' '.join(
-                [task_launcher, main_exec, main_args, main_opts])
+            main_opts = taskopts["main"].get("options", "")
+
+            if main_opts is None:
+                main_opts = ""
+            else:
+                main_opts = cli_args_from_dict(main_opts)
+
+            taskpre = '\n'.join(taskopts["pre"])
+            taskpost = '\n'.join(taskopts["post"])
+            task = '\n'.join([
+                taskpre,
+                ' '.join([task_launcher, main_exec, main_args, main_opts]),
+                taskpost,
+            ])
 
             script_template = '\n'.join(
-                self.job_configuration["job"]["script"])
+                self.job_configuration["workload"]["script"])
+
+            postscript_template = '\n'.join(
+                self.job_configuration["workload"]["postscript"])
 
             self._script = '\n\n'.join(
-                [script_template, main_line])
+                [script_template, task, postscript_template])
 
     def load(self, yaml_config, require_on_load=False):
 
@@ -399,7 +415,7 @@ class JobBuilder(object):
 
     def configure_workload(self, config_dict):
         '''Give a configuration to bind missing parameters.
-        If all parameter keys are given values, the `configured`
+        If all parameter keys are given values, the `ready`
         attribute will return True and jobs can be launched.
         '''
         assert isinstance(config_dict, dict)
@@ -444,7 +460,7 @@ class JobBuilder(object):
         all have values.
         '''
 
-        if self.configured:
+        if self.ready:
             if not self.job_launcher:
                 self._configure_launcher()
 
@@ -458,6 +474,7 @@ class JobBuilder(object):
                 out, retval = small_proc_watch_block(
                    job_launcher)
 
+                # FIXME confusing stdout with returncode i think
                 print(out)
                 print("")
                 print("Any errors during submission? (0 means no, i.e. good thing)")

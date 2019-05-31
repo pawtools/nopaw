@@ -2,9 +2,11 @@
 
 import yaml
 from pprint import pformat
+from pathlib import Path
 
 import pawtools
 
+paw_home = Path('.').absolute()
 
 if __name__ == "__main__":
 
@@ -20,21 +22,15 @@ if __name__ == "__main__":
     logger.info("Running PAW command '%s'"%args.command)
     logger.info("with args {}".format(args))
 
-    with open(args.config, 'r') as f_config:
-        config = yaml.safe_load(f_config)
-
-    logger.info("PAW Config: {}".format(pformat(config)))
-    command_config_filepath = config[args.command]
-
     # No changes needed here when expanding command set
     paw_runtime = pawtools.runtimes.get(args.command, None)
 
     if paw_runtime is not None:
         logger.info("Retrieved this runtime function: {}".format(paw_runtime))
-        paw_runtime(args, command_config_filepath)
+        paw_runtime(args, paw_home)
 
     else:
         logger.error("Could not find runtime function '%s'" % args.command)
         logger.error("Available runtime functions are:\n{}".format(
-            list(paw_runtime.keys())
+            list(pawtools.runtime.keys())
         ))

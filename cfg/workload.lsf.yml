@@ -21,12 +21,15 @@ workload:
   script:
     - "module unload python"
     - "export OMP_NUM_THREADS={threads_per_task}"
-    - "source {shprofile}"
+    - "SHPROFILE={shprofile}"
+    - "source $SHPROFILE"
     - "which python"
+    - "which launch_amongod"
     - "NNODES={n_nodes}"
     - "NETDEVICE=\"ib0\""
     - "DBNAME=testdb"
     - "DBLOCATION={db_location}"
+    - "mkdir $DBLOCATION"
     #or
     #- "NNODES=$(echo \"`echo $LSB_MCPU_HOSTS | tr ' ' '\n' | sort -u | wc -l` - 3\" | bc)"
     #TODO config per task

@@ -1,9 +1,32 @@
 task:
-    pre:  
+    pre:
+        - "source {shprofile}"
+        - "DBHOST=$REMOTEHOST"
+        - "DBPORT=$REMOTEPORT"
+        #- "DBHOST={db_host}"
+        #- "DBPORT={db_port}"
+        #- "DBNAME={db_name}"
+        - "OPERATION=write"
+        - "MYID=$OMPI_COMM_WORLD_RANK"
+        # TODO this moves out to executor level
+        - "echo \"I'm a connector\" >> $MYCONNLOG"
+        - "echo \"My Python: $(which python)\" >> $MYCONNLOG"
+        - "echo \"a connector starts `date +%Y/%m/%d-%H:%M:%S.%5N`\" >> $MYCONNLOG"
+        - "MYCONNLOG=executors/nopaw.connector.$MYID.out"
+        - "MYEXECLOG=executors/nopaw.executor.$MYID.out"
 
     main:
         executable:
+          - "mongo-sync.py"
+
         arguments:
+          - "$OPERATION"
+          - "$DBHOST"
+          - "$DBPORT"
+          - "$DBNAME >> $MYEXECLOG"
+
+        options:
 
     post:
-
+        - "sleep 60"
+        - "echo \"a connector stops `date +%Y/%m/%d-%H:%M:%S.%5N`\" >> $MYCONNLOG"
