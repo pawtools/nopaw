@@ -1,5 +1,5 @@
 # Nopaw Files
-rt.bashrc
+*.bashrc
 sessions/*
 software/*
 
