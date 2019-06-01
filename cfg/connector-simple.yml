@@ -1,0 +1,13 @@
+task:
+    main:
+        executable:
+          - "db-connector.bash"
+
+        arguments:
+          - "$REMOTEHOST"
+          - "$REMOTEPORT"
+          - "$DBNAME"
+          - "{operation}"
+          - "2> nopaw.executor.launch.err 1> nopaw.executor.launch.out"
+
+        options:

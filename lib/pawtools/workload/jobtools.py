@@ -358,12 +358,8 @@ class JobBuilder(object):
             else:
                 main_opts = cli_args_from_dict(main_opts)
 
-            taskpre = '\n'.join(taskopts["pre"])
-            taskpost = '\n'.join(taskopts["post"])
             task = '\n'.join([
-                taskpre,
                 ' '.join([task_launcher, main_exec, main_args, main_opts]),
-                taskpost,
             ])
 
             script_template = '\n'.join(

@@ -48,21 +48,29 @@ def workload(args, paw_home):
     workload_config_location = paw_home / workload_config_filename
     shprofile = paw_home / args.pawrc
 
+    # TODO get from config
+    cores_per_node = 42
+    gpu_per_node     = 6
+    allocation = "bif112"
+
     session_mover = SessionMover(sessions_home)
 
     # Set all the needed options from config fields
     # Paw Runtime
     # Options commonly changed
+    operation = args.task_args[0]
     n_tasks = args.n_replicates
     job_name = args.job_name
     minutes = args.n_minutes
     # FIXME database/environment model not good
+    n_mongo_nodes = 1
     db_location = args.db_location
     # TODO add these to options commonly changed config
     mpi_per_task = 1
-    gpu_per_task = 1
-    threads_per_task = 7
-    threads_per_rank = 7
+    #gpu_per_task = 0
+    threads_per_task = 1
+    threads_per_rank = 1
+    n_nodes = int(args.n_replicates)//int(cores_per_node) + bool(int(args.n_replicates)%int(cores_per_node)) + int(n_mongo_nodes)
 
     # Task here is like "MD task" of whatever
     # is assigned to a single MD instance.
@@ -75,16 +83,17 @@ def workload(args, paw_home):
         n_tasks          = n_tasks,
         job_name         = job_name,
         shprofile        = shprofile,
+        operation        = operation,
         mpi_per_task     = mpi_per_task,
-        gpu_per_task     = gpu_per_task,
+        #gpu_per_task     = gpu_per_task,
         threads_per_task = threads_per_task,
         threads_per_rank = threads_per_rank,
     
         #Job and launcher Options
         # FIXME TODO move and replace source as appropriate
-        allocation = 'bif112',
+        allocation = allocation,
         minutes = minutes,
-        n_nodes = 1,
+        n_nodes = n_nodes,
     
         # TODO catch-all final options for task-specific
         #      should be processed here
@@ -93,6 +102,7 @@ def workload(args, paw_home):
         nsteps = 10000,
     )
 
+    logger.info(pformat(jobconfig))
 
     #  # Moves us to a new, unique subdirectory
     # TODO needs to capture env and do file linking
@@ -112,6 +122,7 @@ def workload(args, paw_home):
         db_location = os.path.join(next_session_directory, db_location)
     ))
     jb.configure_workload(jobconfig)
+    logger.info(pformat(jb.job_configuration))
 
     jb.launch_job()
 

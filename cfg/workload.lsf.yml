@@ -2,6 +2,8 @@ workload:
   launcher:  "bsub"
 
   options:
+    -e:      "nopaw.err"
+    -o:      "nopaw.out"
     -J:      "{job_name}"
     -P:      "{allocation}"
     -W:      "{minutes}"
@@ -30,6 +32,7 @@ workload:
     - "DBNAME=testdb"
     - "DBLOCATION={db_location}"
     - "mkdir $DBLOCATION"
+    - "mkdir $(dirname $DBLOCATION)/executors"
     #or
     #- "NNODES=$(echo \"`echo $LSB_MCPU_HOSTS | tr ' ' '\n' | sort -u | wc -l` - 3\" | bc)"
     #TODO config per task
@@ -87,7 +90,7 @@ workload:
     - "wait $MONGO_GPID"
     - "rm $DBLOCATION/hostname.txt"
     - "echo \"bkill $LSB_JOBID\""
-    - "bkill $LSB_JOBID\""
+    - "bkill $LSB_JOBID"
 
 task:
   launcher: "jsrun"
@@ -97,8 +100,9 @@ task:
     --nrs:                 "{n_tasks}"
     --tasks_per_rs:        "{mpi_per_task}"
     --cpu_per_rs:          "{threads_per_task}"
-    --gpu_per_rs:          "{gpu_per_task}"
+    #--gpu_per_rs:          "{gpu_per_task}"
     --bind:                "packed:{threads_per_task}"
     --launch_distribution: "plane:{mpi_per_task}"
+    #--smpiargs="none":     " "
     --latency_priority:
 

@@ -63,6 +63,7 @@ def get_parser():
     workload_parser.add_argument("session_directory",
         help="Single directory for 'workload' command",
     )
+    # TODO this is definitely executor level not task
     workload_parser.add_argument("task_name",
         help="Specify the desired task (must have matching config task.<task_name>.yml)",
     )
@@ -77,6 +78,10 @@ def get_parser():
     workload_parser.add_argument("-d", "--db_location",
         default="mongo/",
         help="Number of minutes for workload LRMS job",
+    )
+    workload_parser.add_argument("-t", "--task_args",
+        nargs="*",
+        help="Collect all task-specific arguments",
     )
   # TODO task-opts catch all as last
   #      --> processed by command runtime
