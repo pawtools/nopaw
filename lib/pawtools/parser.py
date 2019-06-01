@@ -64,8 +64,8 @@ def get_parser():
         help="Single directory for 'workload' command",
     )
     # TODO this is definitely executor level not task
-    workload_parser.add_argument("task_name",
-        help="Specify the desired task (must have matching config task.<task_name>.yml)",
+    workload_parser.add_argument("executor",
+        help="Specify the desired tasks wrapper",
     )
     workload_parser.add_argument("n_replicates",
         type=int,

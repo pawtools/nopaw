@@ -1,9 +1,0 @@
-task:
-    pre:  
-
-    main:
-        executable:
-        arguments:
-
-    post:
-

@@ -1,0 +1,14 @@
+task:
+  launcher: "jsrun"
+
+  resource:
+    --exit_on_error:       1
+    --nrs:                 "{n_tasks}"
+    --tasks_per_rs:        "{mpi_per_task}"
+    --cpu_per_rs:          "{threads_per_task}"
+    #--gpu_per_rs:          "{gpu_per_task}"
+    --bind:                "packed:{threads_per_task}"
+    --launch_distribution: "plane:{mpi_per_task}"
+    #--smpiargs="none":     " "
+    --latency_priority:
+

@@ -15,9 +15,11 @@ __runtime__ = [
 # TODO use these to navigate and build full runtime configuration
 _required_configs = [
     "resource",  # description of node layout, queues, etc
-    "sessions",  # prefix for all runtime session outputs
+    "session",   # prefix for all runtime session outputs
     "user",      # account information, ie allocation
-    "workload",  # launch configuration
+    "workload",  # job configuration
+    "launch",    # launch configuration
+    "executor",  # wrapper configuration
 ]
 
 def workload(args, paw_home):
@@ -38,13 +40,14 @@ def workload(args, paw_home):
         paw_config = yaml.safe_load(f_config)
 
     workload_config_filename = paw_config["workload"]
-    task_config_filename = paw_config["tasks"].get(args.task_name, None)
+    launcher_config_filename = paw_config["launcher"]
+    executor_config_filename = paw_config["executor"].get(args.executor, None)
 
-    if not task_config_filename:
-        raise Exception("No task configuration for given option: %s" % args.task_name)
+    if not executor_config_filename:
+        raise Exception("No task configuration for given option: %s" % args.executor)
 
-    sessions_home = paw_home / paw_config["sessions"]
-    task_config_location = paw_home / task_config_filename
+    sessions_home = paw_home / paw_config["session"]
+    task_config_location = paw_home / executor_config_filename
     workload_config_location = paw_home / workload_config_filename
     shprofile = paw_home / args.pawrc
 

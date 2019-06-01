@@ -1,11 +1,9 @@
 user:     "cfg/user.yml"
-workload: "cfg/workload.lsf.yml"
 analyze:  "cfg/analyze.yml"
 resource: "cfg/resource.summit.yml"
-sessions: "sessions"
+workload: "cfg/workload.lsf.yml"
+launcher:   "cfg/task.jsrun.yml"
+executor:
+  connector-simple: "cfg/connector-simple.yml"
 
-# TODO alias's for task names
-# FIXME this isn't tasks, its executors
-#       TODO task configs separate from excfg
-tasks:
-    connector-simple:  "cfg/connector-simple.yml"
+session:  "sessions"
