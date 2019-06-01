@@ -18,7 +18,7 @@ _required_configs = [
     "session",   # prefix for all runtime session outputs
     "user",      # account information, ie allocation
     "workload",  # job configuration
-    "launch",    # launch configuration
+    "launcher",    # launch configuration
     "executor",  # wrapper configuration
 ]
 
@@ -46,10 +46,12 @@ def workload(args, paw_home):
     if not executor_config_filename:
         raise Exception("No task configuration for given option: %s" % args.executor)
 
-    sessions_home = paw_home / paw_config["session"]
-    task_config_location = paw_home / executor_config_filename
+    sessions_home =            paw_home / paw_config["session"]
+    shprofile =                paw_home / args.pawrc
+
+    executor_config_location = paw_home / executor_config_filename
+    launcher_config_location = paw_home / launcher_config_filename
     workload_config_location = paw_home / workload_config_filename
-    shprofile = paw_home / args.pawrc
 
     # TODO get from config
     cores_per_node = 42
@@ -61,7 +63,11 @@ def workload(args, paw_home):
     # Set all the needed options from config fields
     # Paw Runtime
     # Options commonly changed
-    operation = args.task_args[0]
+    if len(args.task_args) != 1:
+        raise Exception("Require argument 'operation' for option '-t'/'--task_args'")
+    else:
+        operation = args.task_args[0]
+
     n_tasks = args.n_replicates
     job_name = args.job_name
     minutes = args.n_minutes
@@ -116,7 +122,8 @@ def workload(args, paw_home):
 
     jb = JobBuilder()
     jb.load(workload_config_location)
-    jb.load(task_config_location)
+    jb.load(executor_config_location)
+    jb.load(launcher_config_location)
 
     # TODO this only makes sense for single workload
     #      applications, ie here every session gets own

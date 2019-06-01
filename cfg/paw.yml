@@ -1,8 +1,12 @@
 user:     "cfg/user.yml"
 analyze:  "cfg/analyze.yml"
 resource: "cfg/resource.summit.yml"
+# export a layer of options to resource.yml
+# and let that specify jsrun/mpirun... && lsf/pbs/...
+# which would now be in list format here just as
+# executor is
 workload: "cfg/workload.lsf.yml"
-launcher:   "cfg/task.jsrun.yml"
+launcher: "cfg/launch.jsrun.yml"
 executor:
   connector-simple: "cfg/connector-simple.yml"
 
