@@ -1,45 +1,48 @@
 #!/usr/bin/env python
 
-import sys
 import os
+import yaml
 from pprint import pformat
 from pymongo import MongoClient
+
+from .logger import get_logger
+
+# TODO use the jobtools.MongoInstance to launch
 
 __runtime__ = [
     "verify",
 ]
 
-def verify():
-    pass
+def verify(args, paw_home):
 
-if __name__ == "__main__":
+    logger = get_logger(__name__, "INFO" if args.verbose else "WARNING")
+    #logger = pawtools.get_logger(__name__, "INFO")
+    logger.setLevel("INFO" if args.verbose else "WARNING")
+    logger.critical("LOGLEVEL set to: {}".format(logger.level))
+    logger.info("Running PAW command '%s'"%args.command)
+    logger.info("with args {}".format(args))
 
-    if sys.argv[0]:
-        dbhost = sys.argv[1]
-        dbport = sys.argv[2]
-        dbname = sys.argv[3]
-        runname = sys.argv[4]
-        operation = sys.argv[5]
-        nreplicates = sys.argv[6]
+    paw_config_location = paw_home / args.config
 
+    # Set all the needed options from config fields
+    # Paw Runtime
+    # Options commonly changed
+    if not isinstance(args.task_args, list):
+        raise Exception("Option '-t'/'--task_args' must be given")
+    elif len(args.task_args) != 1:
+        raise Exception("Require argument 'operation' for option '-t'/'--task_args'")
     else:
-        dbhost = "0.0.0.0"
-        dbport = "27017"
-        dbname = "testdb"
-        runname = "write10"
-        operation = "write"
-        nreplicates = "10"
+        operation = args.task_args[0]
 
-    session_directory = os.path.join("sessions", runname)
+    nreplicates = args.n_replicates
+    dbhost      = args.db_host
+    dbport      = args.db_port
+    dbname      = args.db_name
+    session_directory = args.session_directory
 
     verified = os.path.join(session_directory, "verified.true")
     notverified = os.path.join(session_directory, "verified.false")
     verify_filename = os.path.join(session_directory, "verify-data.pyd")
-
-    assert dbport.find('.') < 0
-    assert nreplicates.find('.') < 0
-    dbport = int(dbport)
-    nreplicates = int(nreplicates)
 
     thedata = """Jem says hello
     Jem says hi

@@ -95,6 +95,26 @@ def get_parser():
     verify_parser.add_argument("session_directory",
         help="Single directory for 'verify' command",
     )
+    verify_parser.add_argument("n_replicates",
+        type=int,
+        help="Number of task replicates",
+    )
+    verify_parser.add_argument("--db_host",
+        default="0.0.0.0",
+        help="(Usually don't need to set to verify) host name or IP for database",
+    )
+    verify_parser.add_argument("--db_port",
+        default=27017, type=int,
+        help="(Usually don't need to set to verify) database port number on host",
+    )
+    verify_parser.add_argument("-d", "--db_name",
+        default="testdb",
+        help="Name of database where workload is stored",
+    )
+    verify_parser.add_argument("-t", "--task_args",
+        nargs="*",
+        help="Collect all task-specific arguments",
+    )
 
     #-------------------------------------------------#
     #   - ANALYZE

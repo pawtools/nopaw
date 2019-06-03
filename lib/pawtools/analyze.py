@@ -67,7 +67,7 @@ _create_sequence  = lambda y: [
 ]
 
 
-def analyze(args, config_filepath):
+def analyze(args, paw_home):
     logger = get_logger(__name__, "INFO" if args.verbose else "WARNING")
     # FIXME the level input broken right now
     logger = get_logger(__name__, "INFO" if args.verbose else "WARNING")
@@ -77,11 +77,15 @@ def analyze(args, config_filepath):
 
     #-----------------------------------------------------------#
     # Second thing first, read and set configuration
-    logger.info("Reading config from file: %s"%config_filepath)
+    config_location = paw_home / args.config
+    logger.info("Reading config from file: %s"%config_location)
 
-    with open(config_filepath, 'r') as f_config:
+    # FIXME with the later proper structure
+    with open(config_location, 'r') as f_config:
         #analyze_configuration = pawutils.load_config(args.config)
-        analyze_configuration = yaml.safe_load(f_config)
+        # FIXME this part here particularly
+        with open(yaml.safe_load(f_config)['analyze'], 'r') as a_config:
+            analyze_configuration = yaml.safe_load(a_config)
 
     #workload_filenames = analyze_configuration['workload_filenames']
     #del#workload_folder     = analyze_configuration['workload']['folder']

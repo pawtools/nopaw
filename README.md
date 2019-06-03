@@ -1,32 +1,18 @@
 ## nopaw- just a pipeline
 
-- TODO write basic test routines:
-       read/write - 1. (live) execution unit test with
-                    runme followed by 2. verifyrun
-       verifyrun  - 1. use pre-existing read-10/write-10
-                    to 2. ensure verify methods continue
-                    to give expected result
-       analyzerun - 1. use pre-existing read-10/write-10
-                    to 2. ensure analysis methods continue
-                    to give expected result
-       each of these 3 test modes should be run with
-       each of the task/operation types
+Simple workload pipeline for testing software on HPCs and computer clusters.
+nopaw abstracts computational work with this model:
 
-- TODO the workload module/runtime function same-name
-       must be fixed
-- TODO new operation types to test file writing via:
-       bash wrapper, python script (+subprocess)
-- TODO same order of positional arguments
-       in `runme` and `verifyrun`
-- TODO option to switch between gridfs based
-       file data and the in-task-document model
-- TODO "pipeline" executors with read/write operations
+   `job`      --> instructions to `launch` components (usually for particular `workload`)
+   `workload` --> set of independent `task`s (executed in LRMS `submit`'d `job` on HPC)
+   `executor` --> `launch`'d, database synched wrapper who `run`s `task`s
 
-Simple pipeline for database read and write tests.
-A new database is created, and N parallel read/write
-operations take place, plus a 60 second sleep.
-The sleep is sort of a stand-in for the (still TODO)
-pipeline executors.
+
+nopaw's executors have runtime slots to allow signal propagation
+for steering or otherwise modifying any current tasks through their 
+executors. This is implemented by an asynchronous execution model
+where `executor`s poll the database for `task`s and `run` them, while
+continually checking for `signal`s in database `slot`s.
 
 Simple wrappers are used to place loop-free
 communicators onto your HPC in an LRMS job. The
@@ -147,3 +133,24 @@ do
   analyzerun weak-w-$scale write $scale
 done
 ```
+
+- TODO write basic test routines:
+       read/write - 1. (live) execution unit test with
+                    runme followed by 2. verifyrun
+       verifyrun  - 1. use pre-existing read-10/write-10
+                    to 2. ensure verify methods continue
+                    to give expected result
+       analyzerun - 1. use pre-existing read-10/write-10
+                    to 2. ensure analysis methods continue
+                    to give expected result
+
+       each of these 3 test modes should be run with
+       each of the task/operation types
+
+- TODO new operation types to test file writing via:
+       bash wrapper, python script (+subprocess)
+
+- TODO option to switch between gridfs based
+       file data and the in-task-document model
+
+

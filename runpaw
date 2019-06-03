@@ -32,5 +32,5 @@ if __name__ == "__main__":
     else:
         logger.error("Could not find runtime function '%s'" % args.command)
         logger.error("Available runtime functions are:\n{}".format(
-            list(pawtools.runtime.keys())
+            list(pawtools.runtimes.keys())
         ))
