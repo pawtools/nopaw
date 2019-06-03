@@ -8,36 +8,35 @@ nopaw abstracts computational work with this model:
    `executor` --> `launch`'d, database synched wrapper who `run`s `task`s
 
 
-nopaw's executors have runtime slots to allow signal propagation
-for steering or otherwise modifying any current tasks through their 
+nopaw's executors recieve runtime signals that can propagate
+steering commands or otherwise modify the state of tasks and 
 executors. This is implemented by an asynchronous execution model
 where `executor`s poll the database for `task`s and `run` them, while
-continually checking for `signal`s in database `slot`s.
+also continually checking for `signal`s in database.
 
-Simple wrappers are used to place loop-free
-communicators onto your HPC in an LRMS job. The
-communicators are told to do a `read` or `write`
-operation when you launched the job, and perform
-the operation after they are distributed on the
-HPC, then shutdown following their sleep.
+Simple wrappers are used to place executors onto your HPC in an LRMS job.
+The executors are told to do a task when you launched the job, and perform
+the operation after they are distributed on the HPC, then shutdown.
 
 ![nopaw execution sequence](https://raw.githubusercontent.com/pawtools/nopaw/branch/nopaw-sequence.png)
 
-The reads or writes can then be verified for data
-integrity. A number of timestamps are reported,
+Simple `read` and `write` operations are provided to demonstrate the infrastructure and
+verify basic operations. A number of timestamps are reported,
 which can be analyzed to understand the maximum
 possible performance of a Workflow Management System
 built on the particular database in the tested
-HPC environment.
+HPC environment. Instructions for these test cases are in this README.
+For examples of creating basic workload configurations yourself, see the tutorials section.
+All tutorial examples can be run as introduced with nopaw out-of-the-box. 
 
-There are a small number of control parameters that
+With the simple `read` and `write` tasks, there are a small number of control parameters that
 can be varied to understand how the performance
 changes in response to expectable stressors:
 
  - Scale: n replicates
  - Operation Type: read or write
  - Data Size: size and unit (blank=k, m)
- - Layout Factor: communicators per node
+ - Executor Layout: executors per node (max 1 per cpu)
 
 Currently nopaw MongoDB as database and PyMongo to
 interface.
