@@ -16,10 +16,13 @@ if __name__ == "__main__":
     dbhost = sys.argv[2]
     dbport = sys.argv[3]
     dbname = sys.argv[4]
+    data_factor = sys.argv[5]
 
     assert operation in {"read","write"}
     assert dbport.find('.') < 0
+    assert data_factor.find('.') < 0
     dbport = int(dbport)
+    data_factor = int(data_factor)
 
     thedata = """Jem says hello
     Jem says hi
@@ -28,7 +31,7 @@ if __name__ == "__main__":
     He's buzzing around like a bizzy bee
     bzzzzzzzzzzzzzzzzzzz
      - jem
-    """
+    """ * data_factor
 
     mongodb = MongoClient(dbhost, dbport)
     db = mongodb[dbname]

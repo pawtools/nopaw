@@ -5,6 +5,7 @@ DBHOST="$1"
 DBPORT="$2"
 DBNAME="$3"
 OPERATION="$4"
+DATAFACTOR="$5"
 
 MYID="$OMPI_COMM_WORLD_RANK"
 MYCONNLOG="executors/nopaw.connector.$MYID.out"
@@ -16,7 +17,7 @@ echo "My Python: $(which python)" >> $MYCONNLOG
 echo "My args $@" >> $MYCONNLOG
 echo "a connector starts `date +%Y/%m/%d-%H:%M:%S.%5N`" >> $MYCONNLOG
 
-mongo-sync.py "$OPERATION" "$DBHOST" "$DBPORT" "$DBNAME" >> $MYEXECLOG
+mongo-sync.py "$OPERATION" "$DBHOST" "$DBPORT" "$DBNAME" "$DATAFACTOR" >> $MYEXECLOG
 
 sleep 60
 echo "a connector stops `date +%Y/%m/%d-%H:%M:%S.%5N`" >> $MYCONNLOG

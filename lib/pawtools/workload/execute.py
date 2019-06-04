@@ -6,6 +6,23 @@ from pprint import pformat
 from .jobtools import JobBuilder, SessionMover#, MongoInstance
 from ..logger import get_logger
 
+
+def process_data_factor(data_multiply):
+
+    data_multiply = data_multiply.lower()
+
+    if data_multiply.endswith('k'):
+        _factor = 1000
+    elif data_multiply.endswith('m'):
+        _factor = 1000000
+    elif data_multiply.endswith('g'):
+        _factor = 1000000000
+    else:
+        _factor = 1
+
+    return int(data_multiply[:-1]) * _factor
+
+
 # PAW Will use runtimes listed
 # to import, 
 __runtime__ = [
@@ -56,14 +73,19 @@ def workload(args, paw_home):
     cores_per_node = 42
     gpu_per_node = 6
     allocation = "bif112"
+    data_factor = 1
 
     # Set all the needed options from config fields
     # Paw Runtime
     # Options commonly changed
-    if len(args.task_args) != 1:
+    if len(args.task_args) not in (1,2):
         raise Exception("Require argument 'operation' for option '-t'/'--task_args'")
+
     else:
         operation = args.task_args[0]
+
+        if len(args.task_args) == 2:
+            data_factor = process_data_factor(args.task_args[1])
 
     n_tasks = args.n_replicates
     job_name = args.job_name
@@ -89,7 +111,6 @@ def workload(args, paw_home):
         n_tasks          = n_tasks,
         job_name         = job_name,
         shprofile        = shprofile,
-        operation        = operation,
         mpi_per_task     = mpi_per_task,
         #gpu_per_task     = gpu_per_task,
         threads_per_task = threads_per_task,
@@ -104,8 +125,8 @@ def workload(args, paw_home):
         # TODO catch-all final options for task-specific
         #      should be processed here
         #Task Options
-        mdsystem = "/gpfs/alpine/bif112/proj-shared/gromacs_systems/large-1M/md_RUNME.tpr",
-        nsteps = 10000,
+        operation        = operation,
+        data_factor      = data_factor,
     )
 
     logger.info(pformat(jobconfig))

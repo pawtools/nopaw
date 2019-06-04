@@ -155,6 +155,7 @@ for scale in "${scales[@]}"; do
   runpaw -v workload executor-simple $scale $minutes -n ws-$scale -t write
 done
 ```
+
 < ...  wait for jobs to complete ... >
 ```bash
 for scale in "${scales[@]}"; do
@@ -165,6 +166,19 @@ done
 # and creates plot with all data together
 runpaw -v analyze sessions -p sessions/filename
 ```
+
+Note that another useful `workload` option `-s` is used to change the session home for different
+groups of data such as putting all sessions for this weak scaling experiment into
+a single directory like this (can be combined with `-n` or alone)
+```bash
+# use current sessions above this group
+sessions=sessions/ws
+## or put this group at top nopaw directory
+#sessions=ws
+runpaw -v workload executor-simple $scale $minutes -s $sessions -n ws-$scale -t write
+```
+
+
 
 - TODO write basic test routines:
        read/write - 1. (live) execution unit test with

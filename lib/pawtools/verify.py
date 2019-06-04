@@ -7,6 +7,7 @@ from pymongo import MongoClient
 
 from .logger import get_logger
 from .workload.jobtools import MongoInstance
+from .workload.execute import process_data_factor
 
 # TODO use the jobtools.MongoInstance to launch
 
@@ -30,10 +31,13 @@ def verify(args, paw_home):
     # Options commonly changed
     if not isinstance(args.task_args, list):
         raise Exception("Option '-t'/'--task_args' must be given")
-    elif len(args.task_args) != 1:
+    elif len(args.task_args) not in (1,2):
         raise Exception("Require argument 'operation' for option '-t'/'--task_args'")
     else:
         operation = args.task_args[0]
+
+        if len(args.task_args) == 2:
+            data_factor = process_data_factor(args.task_args[1])
 
     session_directory = args.session_directory
     nreplicates = args.n_replicates
@@ -54,7 +58,7 @@ def verify(args, paw_home):
     He's buzzing around like a bizzy bee
     bzzzzzzzzzzzzzzzzzzz
      - jem
-    """
+    """ * data_factor
 
     verify_data = dict()
     verify_data["correct"] = correct = list()
