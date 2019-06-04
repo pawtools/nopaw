@@ -163,7 +163,7 @@ for scale in "${scales[@]}"; do
 done
 
 # this measures execution times for all guys under parent folder
-# and creates plot with all data together
+# and creates plot with all data together with name "filename-weak-scaling.png"
 runpaw -v analyze sessions -p sessions/filename
 ```
 

@@ -29,6 +29,7 @@ def verify(args, paw_home):
     # Set all the needed options from config fields
     # Paw Runtime
     # Options commonly changed
+    data_factor = 1
     if not isinstance(args.task_args, list):
         raise Exception("Option '-t'/'--task_args' must be given")
     elif len(args.task_args) not in (1,2):

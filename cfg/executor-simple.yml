@@ -7,7 +7,8 @@ task:
           - "$REMOTEHOST"
           - "$REMOTEPORT"
           - "$DBNAME"
-          - "{operation} {data_factor}"
+          - "{operation}"
+          - "{data_factor}"
           - "2> nopaw.executor.launch.err 1> nopaw.executor.launch.out"
 
         options:
