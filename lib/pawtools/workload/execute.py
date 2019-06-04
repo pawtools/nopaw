@@ -41,23 +41,21 @@ def workload(args, paw_home):
     workload_config_filename = paw_config["workload"]
     launcher_config_filename = paw_config["launcher"]
     executor_config_filename = paw_config["executor"].get(args.executor, None)
-
     if not executor_config_filename:
         raise Exception("No task configuration for given option: %s" % args.executor)
-
-    sessions_home =            paw_home / args.sessions
-    shprofile =                paw_home / args.pawrc
-
     executor_config_location = paw_home / executor_config_filename
     launcher_config_location = paw_home / launcher_config_filename
     workload_config_location = paw_home / workload_config_filename
 
+    shprofile = paw_home / args.pawrc
+    session_home  = paw_home / args.session_home
+    session_name  = args.session_name
+    session_mover = SessionMover(session_home, session_name)
+
     # TODO get from config
     cores_per_node = 42
-    gpu_per_node     = 6
+    gpu_per_node = 6
     allocation = "bif112"
-
-    session_mover = SessionMover(sessions_home)
 
     # Set all the needed options from config fields
     # Paw Runtime

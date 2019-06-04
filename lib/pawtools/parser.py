@@ -72,7 +72,10 @@ def get_parser():
         type=int,
         help="Number of minutes for workload LRMS job",
     )
-    workload_parser.add_argument("-s", "--sessions",
+    workload_parser.add_argument("-n", "--session_name",
+        help="Fix a particular session name",
+    )
+    workload_parser.add_argument("-s", "--session_home",
         default="sessions",
         help="Change the top-level directory for workload sessions",
     )
@@ -124,7 +127,7 @@ def get_parser():
     #-------------------------------------------------#
     #   - ANALYZE
     analyze_parser.add_argument("session_directory",
-        help="Single or glob pattern for 'analyze' command."
+        help="Single session dir or parent dir of group for 'analyze' command."
     )
     analyze_parser.add_argument("output_timestamps",
         nargs="?", default="timestamps.txt",

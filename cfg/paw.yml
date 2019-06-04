@@ -8,4 +8,4 @@ resource: "cfg/resource.summit.yml"
 workload: "cfg/workload.lsf.yml"
 launcher: "cfg/launch.jsrun.yml"
 executor:
-  connector-simple: "cfg/connector-simple.yml"
+  executor-simple: "cfg/executor-simple.yml"

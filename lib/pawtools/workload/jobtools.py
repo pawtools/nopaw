@@ -197,13 +197,14 @@ class SessionMover(object):
     _first = 0
     _capture = '.log'
 
-    def __init__(self, path):
+    def __init__(self, path, static_name=None):
         super(SessionMover, self).__init__()
 
         self._base = path
         self._path = os.path.join(path, SessionMover._prefix)
         self._currentID = None
         self._init_sessionID()
+        self._static_name = static_name
 
     def _init_sessionID(self):
         if not os.path.exists(self._path):
@@ -255,7 +256,12 @@ class SessionMover(object):
 
     @property
     def current(self):
-        return os.path.join(self._path, self.currentID)
+        if self._static_name:
+            current = os.path.join(self._path, self._static_name)
+        else:
+            current = os.path.join(self._path, self.currentID)
+
+        return current
 
     def __iter__(self):
         return self

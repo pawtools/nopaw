@@ -80,7 +80,7 @@ def verify(args, paw_home):
 
         for executor in executors:
             for line in open(executor, 'r').readlines():
-                if line.strip() == verified_message:
+                if line.strip().find(verified_message) >= 0:
                     count += 1
                     correct.append(executor)
                     break
