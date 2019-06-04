@@ -178,6 +178,28 @@ sessions=sessions/ws
 runpaw -v workload executor-simple $scale $minutes -s $sessions -n ws-$scale -t write
 ```
 
+## Example Run Different Data Bandwidth:
+----------------------------------------
+Example: synchronize more and more data.
+```bash
+source paw.bashrc
+replicates=10
+scales=( 1 100 10k 1m )
+minutes=10
+
+for scale in "${scales[@]}"; do
+  runpaw -v workload executor-simple $replicates $minutes -n ds-w-$scale -t write $scale
+  runpaw -v workload executor-simple $replicates $minutes -n ds-r-$scale -t read  $scale
+done
+```
+
+< ...  wait for jobs to complete ... >
+```bash
+for scale in "${scales[@]}"; do
+  runpaw -v verify sessions/ds-w-$scale $replicates -t write $scale
+  runpaw -v verify sessions/ds-r-$scale $replicates -t read  $scale
+done
+```
 
 
 - TODO write basic test routines:

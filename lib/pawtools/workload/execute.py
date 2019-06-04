@@ -19,6 +19,7 @@ def process_data_factor(data_multiply):
         _factor = 1000000000
     else:
         _factor = 1
+        data_multiply += ' '
 
     return int(data_multiply[:-1]) * _factor
 
@@ -55,24 +56,30 @@ def workload(args, paw_home):
     with open(paw_config_location, 'r') as f_config:
         paw_config = yaml.safe_load(f_config)
 
+    user_config_filename     = paw_config["user"]
     workload_config_filename = paw_config["workload"]
     launcher_config_filename = paw_config["launcher"]
     executor_config_filename = paw_config["executor"].get(args.executor, None)
     if not executor_config_filename:
         raise Exception("No task configuration for given option: %s" % args.executor)
+    user_config_location     = paw_home / user_config_filename
     executor_config_location = paw_home / executor_config_filename
     launcher_config_location = paw_home / launcher_config_filename
     workload_config_location = paw_home / workload_config_filename
+
+    with open(user_config_location, 'r') as f_config:
+        user_config = yaml.safe_load(f_config)
 
     shprofile = paw_home / args.pawrc
     session_home  = paw_home / args.session_home
     session_name  = args.session_name
     session_mover = SessionMover(session_home, session_name)
 
+    allocation = user_config["allocation"]
+
     # TODO get from config
     cores_per_node = 42
     gpu_per_node = 6
-    allocation = "bif112"
     data_factor = 1
 
     # Set all the needed options from config fields
@@ -111,6 +118,7 @@ def workload(args, paw_home):
         n_tasks          = n_tasks,
         job_name         = job_name,
         shprofile        = shprofile,
+        allocation       = allocation,
         mpi_per_task     = mpi_per_task,
         #gpu_per_task     = gpu_per_task,
         threads_per_task = threads_per_task,
@@ -118,7 +126,6 @@ def workload(args, paw_home):
     
         #Job and launcher Options
         # FIXME TODO move and replace source as appropriate
-        allocation = allocation,
         minutes = minutes,
         n_nodes = n_nodes,
     
@@ -149,6 +156,7 @@ def workload(args, paw_home):
     jobconfig.update(dict(
         db_location = os.path.join(next_session_directory, db_location)
     ))
+
     jb.configure_workload(jobconfig)
     logger.info(pformat(jb.job_configuration))
 

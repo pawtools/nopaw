@@ -49,7 +49,7 @@ workload:
     - "mongosshlaunch=\"ssh-and-launch.expect $SHPROFILE $REMOTEHOST launch_amongod $DBLOCATION $REMOTEPORT $VERBOSE\""
     - "eval $mongosshlaunch 2> nopaw.mongodb.sshlaunch.err 1> nopaw.mongodb.sshlaunch.out & MONGO_APID=$!"
     - "sleep 20"
-    - "initmongodbcommand=\"mongo-initdb.py $REMOTEHOST $REMOTEPORT $DBNAME\""
+    - "initmongodbcommand=\"mongo-initdb.py $REMOTEHOST $REMOTEPORT $DBNAME {data_factor}\""
     - "echo $initmongodbcommand"
     - "eval $initmongodbcommand 2> nopaw.mongodb.initialize.err 1> nopaw.mongodb.initialize.out"
     #Workflow Runtime Start Timestamp
