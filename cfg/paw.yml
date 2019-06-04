@@ -9,5 +9,3 @@ workload: "cfg/workload.lsf.yml"
 launcher: "cfg/launch.jsrun.yml"
 executor:
   connector-simple: "cfg/connector-simple.yml"
-
-session:  "sessions"

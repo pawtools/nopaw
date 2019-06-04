@@ -60,9 +60,6 @@ def get_parser():
 
     #-------------------------------------------------#
     #   - WORKLOAD
-    workload_parser.add_argument("session_directory",
-        help="Single directory for 'workload' command",
-    )
     # TODO this is definitely executor level not task
     workload_parser.add_argument("executor",
         help="Specify the desired tasks wrapper",
@@ -74,6 +71,10 @@ def get_parser():
     workload_parser.add_argument("n_minutes",
         type=int,
         help="Number of minutes for workload LRMS job",
+    )
+    workload_parser.add_argument("-s", "--sessions",
+        default="sessions",
+        help="Change the top-level directory for workload sessions",
     )
     workload_parser.add_argument("-d", "--db_location",
         default="mongo/",
@@ -98,6 +99,10 @@ def get_parser():
     verify_parser.add_argument("n_replicates",
         type=int,
         help="Number of task replicates",
+    )
+    verify_parser.add_argument("--db_location",
+        default="mongo/",
+        help="Number of minutes for workload LRMS job",
     )
     verify_parser.add_argument("--db_host",
         default="0.0.0.0",

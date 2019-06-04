@@ -3,9 +3,9 @@
 Simple workload pipeline for testing software on HPCs and computer clusters.
 nopaw abstracts computational work with this model:
 
-   `job`      --> instructions to `launch` components (usually for particular `workload`)
-   `workload` --> set of independent `task`s (executed in LRMS `submit`'d `job` on HPC)
-   `executor` --> `launch`'d, database synched wrapper who `run`s `task`s
+  -  `job`      --> instructions to `launch` components (usually for particular `workload`)
+  -  `workload` --> set of independent `task`s (executed in LRMS `submit`'d `job` on HPC)
+  -  `executor` --> `launch`'d, database synched wrapper who `run`s `task`s
 
 
 nopaw's executors recieve runtime signals that can propagate
@@ -33,13 +33,13 @@ With the simple `read` and `write` tasks, there are a small number of control pa
 can be varied to understand how the performance
 changes in response to expectable stressors:
 
- - Scale: n replicates
  - Operation Type: read or write
+ - Scale: n replicates
  - Data Size: size and unit (blank=k, m)
  - Executor Layout: executors per node (max 1 per cpu)
 
-Currently nopaw MongoDB as database and PyMongo to
-interface.
+
+Currently nopaw MongoDB as database and PyMongo to interface.
 Could easily provide wrappers for simple operations
 with other databases, or exchange the PyMongo
 connector/Python Executor with other interfaces
@@ -47,34 +47,62 @@ such as C++, Java, etc.
 
 ## Install:
 -----------
+There will be a message about mongodb since there is a limited ability to easily
+install this compared with the rest of the software. If you can use a freely
+downloaded version, replace/use the given value from the variable "MONGODB_VERSION"
+in the installer.
 ```bash
 git clone https://github.com/pawtool/nopaw.git
 cd nopaw
 ./install.sh
 ```
 
+## Steps before Runtime:
+------------------------
+Run the 4 steps below to check that your platform installed completely and that you have
+configured it to run correctly on your HPC system. Note that you must specify
+a number of runtime system details in the configuration files under `cfg` subdirectory.
+Troubleshooting issues
+with your config should feel almost exactly the same as running a command manually, and
+fixing the reported errors that may come up. i.e. if you try to `bsub`/`qsub` and the
+LRMS gives an error that you need some option, add it to the configs by copying an
+existing line in the `workload` `option` section and modify it according to the error
+and/or documentation your admin provide. Every HPC and user thereof requires these files
+are filled out correctly for PAW to launch its components correctly. 
+  - PAW global configuration: `paw.yml`
+  - HPC job command, content: `workload.<lrmsname>.yml`
+  - HPC task launch command: `launch.<launchername>.yml`
+  - HPC user details: `user.yml`
+  - HPC layout details: `resource.<resourcename>.yml`
+
+Below these HPC-specific configurations, PAW uses workflow-specific components
+that should not change. Right now, the only supported executors are a simple
+connector, and a connector with a runtime loop that inspects for signals in
+its database representation.
+  - PAW task executor: `executor-simple.yml`
+  - PAW task executor: `executor-loop.yml`
+
+For any command shown here, you can type `runpaw <command> -h/--help` to get a
+usage prompt. 
+0. Copy (and edit if necessary) existing
+   config files to match your resource
+1. `runpaw workload [...]` to configure and launch job
+2. wait for LRMS job
+3. `runpaw verify [...]` to verify all operations
+4. `runpaw analyze [...]` to process timestamp data
+
 ## Tests:
 --------------------------------
-Run these to check that your platform installed
-correctly. Note that you must correctly specify
-a small number of runtime system details in the
-configuration file `workload.yml`.
+After you check (or as a way of checking) that the configurations are setup
+so that PAW runs without error, run these tests as a basic verification of
+the functionality. 
 ```bash
 tests/run-all-tests
 ```
 
-## Steps:
----------
-0. Copy (and edit if necessary) existing
-   LRMS config file to match your resource
-1. `runme` to configure and launch job
-2. wait for LRMS job
-3. `verifyrun` to verify all operations
-4. `analyzerun` to process timestamp data
-
 ## Usage:
 ---------
-Always source the RC file: 'rt.bashrc'
+Always source the RC file: 'paw.bashrc'
 
 Run Script Usage:
 ```bash

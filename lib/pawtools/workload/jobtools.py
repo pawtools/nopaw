@@ -77,7 +77,7 @@ class MongoInstance(object):
         super(MongoInstance, self).__init__()
 
         assert self.discover_mongod_command()
-        assert isinstance(dbpath, str) # TODO check is path-like, parent dir exists
+        assert os.path.exists(dbpath) # TODO check is path-like, parent dir exists
         #assert isinstance(dbport, validport) # TODO isint and betwen X and Y
 
         self._dblog_file = None
@@ -85,7 +85,7 @@ class MongoInstance(object):
         self.dbport = dbport
 
     def discover_mongod_command(self):
-        dicover_command = "command -v mongod"
+        discover_command = "command -v mongod"
         out, retval = small_proc_watch_block(discover_command)
         if out: return True
         else:   return False

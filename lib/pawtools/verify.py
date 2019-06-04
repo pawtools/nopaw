@@ -6,6 +6,7 @@ from pprint import pformat
 from pymongo import MongoClient
 
 from .logger import get_logger
+from .workload.jobtools import MongoInstance
 
 # TODO use the jobtools.MongoInstance to launch
 
@@ -34,11 +35,13 @@ def verify(args, paw_home):
     else:
         operation = args.task_args[0]
 
+    session_directory = args.session_directory
     nreplicates = args.n_replicates
     dbhost      = args.db_host
     dbport      = args.db_port
     dbname      = args.db_name
-    session_directory = args.session_directory
+    dbpath      = args.db_location
+    dblocation  = paw_home / session_directory / dbpath
 
     verified = os.path.join(session_directory, "verified.true")
     notverified = os.path.join(session_directory, "verified.false")
@@ -52,14 +55,6 @@ def verify(args, paw_home):
     bzzzzzzzzzzzzzzzzzzz
      - jem
     """
-
-    # FIXME NOTE we (hopefully) harmlessly opening
-    #            and closing the DB even for read
-    #            verify where its not used
-    mongodb = MongoClient(dbhost, dbport)
-
-    db = mongodb[dbname]
-    cl = db[dbname]
 
     verify_data = dict()
     verify_data["correct"] = correct = list()
@@ -93,6 +88,15 @@ def verify(args, paw_home):
                 wrong.append(executor)
 
     elif operation == "write":
+        # FIXME NOTE we (hopefully) harmlessly opening
+        #            and closing the DB
+        mongo = MongoInstance(dblocation)
+        mongo.open_mongodb()
+        # and open client to it
+        mongodb = MongoClient(dbhost, dbport)
+        db = mongodb[dbname]
+        cl = db[dbname]
+
         # NOTE writes are verified here and now
         for document in cl.find():
             count += 1
@@ -103,6 +107,8 @@ def verify(args, paw_home):
                 print("this data was 'wrong':")
                 print(document["data"])
 
+        mongo.stop_mongodb()
+        mongodb.close()
 
     if len(verify_data["wrong"]) == 0:
         # database is always primed with
@@ -129,7 +135,6 @@ def verify(args, paw_home):
             len(verify_data["wrong"]), nreplicates))
 
         open(notverified, 'w').close()
-
 
     verify_data["count"] = count
     with open(verify_filename, 'w') as f_verify:

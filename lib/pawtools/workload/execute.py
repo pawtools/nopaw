@@ -15,7 +15,6 @@ __runtime__ = [
 # TODO use these to navigate and build full runtime configuration
 _required_configs = [
     "resource",  # description of node layout, queues, etc
-    "session",   # prefix for all runtime session outputs
     "user",      # account information, ie allocation
     "workload",  # job configuration
     "launcher",    # launch configuration
@@ -46,7 +45,7 @@ def workload(args, paw_home):
     if not executor_config_filename:
         raise Exception("No task configuration for given option: %s" % args.executor)
 
-    sessions_home =            paw_home / paw_config["session"]
+    sessions_home =            paw_home / args.sessions
     shprofile =                paw_home / args.pawrc
 
     executor_config_location = paw_home / executor_config_filename
