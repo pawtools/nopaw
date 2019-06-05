@@ -6,6 +6,7 @@ from pprint import pformat
 from pymongo import MongoClient
 
 from .logger import get_logger
+
 from .workload.jobtools import MongoInstance
 from .workload.execute import process_data_factor
 
@@ -121,7 +122,7 @@ def verify(args, paw_home):
         # so... the write verify method above
         #       counts an extra entry, just
         #       letting it fly for now
-        if operation == "write" and len(verify_data["correct"]) == 1 + nreplicates \
+        if operation == "write" and len(verify_data["correct"]) == nreplicates + 1 \
         or operation == "read" and len(verify_data["correct"]) == nreplicates:
             print("All {0}/{1} replicates verified".format(
                 len(verify_data["correct"]), nreplicates))

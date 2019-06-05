@@ -23,6 +23,7 @@ if __name__ == "__main__":
     assert data_factor.find('.') < 0
     dbport = int(dbport)
     data_factor = int(data_factor)
+    print("data_factor: {}".format(data_factor))
 
     thedata = """Jem says hello
     Jem says hi
@@ -55,6 +56,7 @@ if __name__ == "__main__":
         readdata = cl.find_one()
         print("sync stopping {}".format(datetime.fromtimestamp(time())))
 
+        print("going to verify at runtime...")
         if thedata == readdata['data']:
             print("Data was verified")
 
@@ -62,6 +64,6 @@ if __name__ == "__main__":
             print("This data was not verified: ")
             print(readdata['data'])
 
-    mongodb.close()
+    #mongodb.close()
     print("pyscript stopping {}".format(datetime.fromtimestamp(time())))
 

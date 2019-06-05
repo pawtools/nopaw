@@ -17,6 +17,8 @@ if __name__ == "__main__":
     dbport = sys.argv[2]
     dbname = sys.argv[3]
     data_factor = sys.argv[4]
+    nreplicates = sys.argv[5]
+    task_operation = sys.argv[5]
 
     assert dbport.find('.') < 0
     dbport = int(dbport)
@@ -36,6 +38,7 @@ if __name__ == "__main__":
     document = {
         "_id" : _uuid_(),
         "data": thedata,
+        "task": False,    # not a task
     }
 
     mongodb = MongoClient(dbhost, dbport)
