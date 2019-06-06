@@ -136,7 +136,7 @@ def workload(args, paw_home):
         data_factor      = data_factor,
     )
 
-    logger.info(pformat(jobconfig))
+    logger.debug(pformat(jobconfig))
 
     #  # Moves us to a new, unique subdirectory
     # TODO needs to capture env and do file linking
@@ -158,7 +158,7 @@ def workload(args, paw_home):
     ))
 
     jb.configure_workload(jobconfig)
-    logger.info(pformat(jb.job_configuration))
+    logger.debug(pformat(jb.job_configuration))
 
     jb.launch_job()
 

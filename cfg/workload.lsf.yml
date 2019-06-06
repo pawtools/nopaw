@@ -53,6 +53,8 @@ workload:
     - "controlmongodbcommand=\"$JSRUN_LAUNCH1 mongo-controller.py $REMOTEHOST $REMOTEPORT $DBNAME {data_factor} {n_tasks} {operation}\""
     - "echo $controlmongodbcommand"
     - "eval $controlmongodbcommand 2> nopaw.mongodb.controller.err 1> nopaw.mongodb.controller.out & PAW_APID=$!"
+    - "give some time for tasks to get into the database"
+    - "sleep 30"
     #- "initmongodbcommand=\"mongo-initdb.py $REMOTEHOST $REMOTEPORT $DBNAME {data_factor}\""
     #- "echo $initmongodbcommand"
     #- "eval $initmongodbcommand 2> nopaw.mongodb.initialize.err 1> nopaw.mongodb.initialize.out"

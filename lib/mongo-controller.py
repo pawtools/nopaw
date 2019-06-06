@@ -2,8 +2,11 @@
 
 import sys
 import os
+from datetime import datetime
+from time import time
 from uuid import uuid1 as _uuid_
 from pymongo import MongoClient
+
 
 # FIXME paw "scripts" should import from pawtools!
 #from pawtools import get_logger
@@ -25,6 +28,8 @@ if __name__ == "__main__":
         nreplicates = 0
         task_operation = False
 
+    assert nreplicates.find('.') < 0
+    nreplicates = int(nreplicates)
     assert dbport.find('.') < 0
     dbport = int(dbport)
     assert data_factor.find('.') < 0
@@ -63,7 +68,7 @@ if __name__ == "__main__":
         cl.insert_one({
             "_id"      : _uuid_(),
             "type"     : "task",
-            "operation": operation,
+            "operation": task_operation,
             "state"    : "created",
             "data"     : None,
             "executor" : None,

@@ -104,7 +104,7 @@ def verify(args, paw_home):
         cl = db[dbname]
 
         # NOTE writes are verified here and now
-        for document in cl.find():
+        for document in cl.find({"type":"task"}):
             count += 1
             logger.info("proper len of data: %d"%len(thedata))
             logger.info("found  len of data: %d"%len(document["data"]))
@@ -122,7 +122,7 @@ def verify(args, paw_home):
         # so... the write verify method above
         #       counts an extra entry, just
         #       letting it fly for now
-        if operation == "write" and len(verify_data["correct"]) == nreplicates + 1 \
+        if operation == "write" and len(verify_data["correct"]) == nreplicates \
         or operation == "read" and len(verify_data["correct"]) == nreplicates:
             print("All {0}/{1} replicates verified".format(
                 len(verify_data["correct"]), nreplicates))

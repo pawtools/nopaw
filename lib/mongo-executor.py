@@ -9,12 +9,12 @@ from pymongo import MongoClient, ReturnDocument
 
 
 def get_task(collection, finder_id):
-    locking_update = {
-        {"$set":
-          {"executor": finder_id,
-           "state"   : "pending",
-        }}
+    locked_by_finder = {
+        "executor": finder_id,
+        "state"   : "pending",
     }
+
+    locking_update = {"$set": locked_by_finder}
 
     created_task_filter = {
         "type" : "task",
@@ -22,7 +22,7 @@ def get_task(collection, finder_id):
     }
 
     task = collection.find_one_and_update(
-        state_filter,
+        created_task_filter,
         locking_update,
         return_document=ReturnDocument.AFTER,
     )
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     my_operation = my_task["operation"]
 
     assert isinstance(my_task, dict)
-    assert operation in {"read","write"}
+    assert my_operation in {"read","write"}
 
     task_running_update = {"state":"running"}
     task_success_update = {"state":"success"}
@@ -72,19 +72,19 @@ if __name__ == "__main__":
         {"$set": task_running_update},
     )
 
-    if operation == "write":
+    if my_operation == "write":
 
         print("sync starting {}".format(datetime.fromtimestamp(time())))
         cl.update_one(
             {"_id"  : my_task["_id"]},
-            {"$set": {"data":thedata},
+            {"$set": {"data":thedata}},
         )
 
         print("sync stopping {}".format(datetime.fromtimestamp(time())))
 
         sleep(60)
 
-    elif operation == "read":
+    elif my_operation == "read":
 
         print("sync starting {}".format(datetime.fromtimestamp(time())))
         readdata = cl.find_one({"type":"data"})
