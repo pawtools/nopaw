@@ -17,7 +17,6 @@ echo "My Python: $(which python)" >> $MYCONNLOG
 echo "My args $@" >> $MYCONNLOG
 echo "a connector starts `date +%Y/%m/%d-%H:%M:%S.%5N`" >> $MYCONNLOG
 
-mongo-sync.py "$OPERATION" "$DBHOST" "$DBPORT" "$DBNAME" "$DATAFACTOR" >> $MYEXECLOG
+mongo-executor.py "$DBHOST" "$DBPORT" "$DBNAME" "$DATAFACTOR" >> $MYEXECLOG
 
-sleep 60
 echo "a connector stops `date +%Y/%m/%d-%H:%M:%S.%5N`" >> $MYCONNLOG

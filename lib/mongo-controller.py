@@ -29,7 +29,6 @@ if __name__ == "__main__":
     dbport = int(dbport)
     assert data_factor.find('.') < 0
     data_factor = int(data_factor)
-    print("data_factor: {}".format(data_factor))
 
     thedata = """Jem says hello
     Jem says hi
@@ -47,15 +46,19 @@ if __name__ == "__main__":
         "type": "data",
     }
 
+    print("controller starting {}".format(datetime.fromtimestamp(time())))
     # Get connection to database
     mongodb = MongoClient(dbhost, dbport)
     db = mongodb[dbname]
     cl = db[dbname]
 
     # Creating data entry
+    print("data synch starting {}".format(datetime.fromtimestamp(time())))
     cl.insert_one(document)
+    print("data synch stopped {}".format(datetime.fromtimestamp(time())))
 
     # Creating Task entries for executors
+    print("task synch starting {}".format(datetime.fromtimestamp(time())))
     for _ in range(nreplicates):
         cl.insert_one({
             "_id"      : _uuid_(),
@@ -65,7 +68,9 @@ if __name__ == "__main__":
             "data"     : None,
             "executor" : None,
     })
+    print("task synch stopped {}".format(datetime.fromtimestamp(time())))
 
     # Done with database
     mongodb.close()
 
+    print("controller stopped {}".format(datetime.fromtimestamp(time())))
