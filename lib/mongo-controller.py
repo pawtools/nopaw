@@ -17,8 +17,13 @@ if __name__ == "__main__":
     dbport = sys.argv[2]
     dbname = sys.argv[3]
     data_factor = sys.argv[4]
-    nreplicates = sys.argv[5]
-    task_operation = sys.argv[5]
+
+    if len(sys.argv) == 7:
+        nreplicates = sys.argv[5]
+        task_operation = sys.argv[6]
+    else:
+        nreplicates = 0
+        task_operation = False
 
     assert dbport.find('.') < 0
     dbport = int(dbport)
@@ -35,15 +40,32 @@ if __name__ == "__main__":
      - jem
     """ * data_factor
 
+    # TODO known types (content class)
     document = {
         "_id" : _uuid_(),
         "data": thedata,
-        "task": False,    # not a task
+        "type": "data",
     }
 
+    # Get connection to database
     mongodb = MongoClient(dbhost, dbport)
-
     db = mongodb[dbname]
     cl = db[dbname]
+
+    # Creating data entry
     cl.insert_one(document)
+
+    # Creating Task entries for executors
+    for _ in range(nreplicates):
+        cl.insert_one({
+            "_id"      : _uuid_(),
+            "type"     : "task",
+            "operation": operation,
+            "state"    : "created",
+            "data"     : None,
+            "executor" : None,
+    })
+
+    # Done with database
     mongodb.close()
+

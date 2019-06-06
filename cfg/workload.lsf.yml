@@ -36,7 +36,8 @@ workload:
     #or
     #- "NNODES=$(echo \"`echo $LSB_MCPU_HOSTS | tr ' ' '\n' | sort -u | wc -l` - 3\" | bc)"
     #TODO config per task
-    - "mongohostlaunch=\"jsrun --exit_on_error 1 --nrs 1 --rs_per_host 1 --tasks_per_rs 1 --cpu_per_rs 42 --bind packed:42 --launch_distribution plane:1 db-ghost-writer.bash $NETDEVICE $DBLOCATION\""
+    - "JSRUN_LAUNCH1=\"jsrun --exit_on_error 1 --nrs 1 --rs_per_host 1 --tasks_per_rs 1 --cpu_per_rs 42 --bind packed:42 --launch_distribution plane:1\""
+    - "mongohostlaunch=\"$JSRUN_LAUNCH1 db-ghost-writer.bash $NETDEVICE $DBLOCATION\""
     - "echo $mongohostlaunch"
     - "eval $mongohostlaunch 2> nopaw.mongodb.ghost.err 1> nopaw.mongodb.ghost.out & MONGO_GPID=$!"
     - "sleep 15"
@@ -49,9 +50,12 @@ workload:
     - "mongosshlaunch=\"ssh-and-launch.expect $SHPROFILE $REMOTEHOST launch_amongod $DBLOCATION $REMOTEPORT $VERBOSE\""
     - "eval $mongosshlaunch 2> nopaw.mongodb.sshlaunch.err 1> nopaw.mongodb.sshlaunch.out & MONGO_APID=$!"
     - "sleep 20"
-    - "initmongodbcommand=\"mongo-initdb.py $REMOTEHOST $REMOTEPORT $DBNAME {data_factor}\""
-    - "echo $initmongodbcommand"
-    - "eval $initmongodbcommand 2> nopaw.mongodb.initialize.err 1> nopaw.mongodb.initialize.out"
+    - "controlmongodbcommand=\"$JSRUN_LAUNCH1 mongo-controller.py $REMOTEHOST $REMOTEPORT $DBNAME {data_factor} {n_tasks} {operation}\""
+    - "echo $controlmongodbcommand"
+    - "eval $controlmongodbcommand 2> nopaw.mongodb.controller.err 1> nopaw.mongodb.controller.out & PAW_APID=$!"
+    #- "initmongodbcommand=\"mongo-initdb.py $REMOTEHOST $REMOTEPORT $DBNAME {data_factor}\""
+    #- "echo $initmongodbcommand"
+    #- "eval $initmongodbcommand 2> nopaw.mongodb.initialize.err 1> nopaw.mongodb.initialize.out"
     #Workflow Runtime Start Timestamp
     - "echo \"a worklow starts `date +%Y/%m/%d-%H:%M:%S.%5N`\""
     #- "executorlaunch=\"jsrun --exit_on_error 1 --nrs $NEXECUTORS --tasks_per_rs 1 --cpu_per_rs $OMP_NUM_THREADS --bind packed:$OMP_NUM_THREADS --launch_distribution plane:1 --smpiargs off db-connector.bash $REMOTEHOST $REMOTEPORT $DBNAME $OPERATION\""
@@ -63,6 +67,8 @@ workload:
     #Runtime Complete Timestamp
     - "echo \"a worklow stops `date +%Y/%m/%d-%H:%M:%S.%5N`\""
     - "echo \"Going to shut down the database, event is finished\""
+    - "kill $PAW_APID"
+    - "wait $PAW_APID"
     - "kill $MONGO_APID"
     - "wait $MONGO_APID"
     #Probably needed because of kooky ssh-expect mongo launch, ie ulimit bug

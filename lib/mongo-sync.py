@@ -5,20 +5,39 @@ import os
 from uuid import uuid1 as _uuid_
 from time import time
 from datetime import datetime
-from pymongo import MongoClient
+from pymongo import MongoClient, ReturnDocument
 
+
+def get_task(collection, finder_id):
+    locking_update = {
+        {"$set":
+          {"executor": finder_id,
+           "state"   : "pending",
+        }}
+    }
+
+    created_task_filter = {
+        "type" : "task",
+        "state": "created",
+    }
+
+    task = collection.find_one_and_update(
+        state_filter,
+        locking_update,
+        return_document=ReturnDocument.AFTER,
+    )
+
+    return task
 
 print("pyscript starting {}".format(datetime.fromtimestamp(time())))
 print("pyscript recieved args:\n{}".format(sys.argv))
 
 if __name__ == "__main__":
-    operation = sys.argv[1]
-    dbhost = sys.argv[2]
-    dbport = sys.argv[3]
-    dbname = sys.argv[4]
-    data_factor = sys.argv[5]
+    dbhost = sys.argv[1]
+    dbport = sys.argv[2]
+    dbname = sys.argv[3]
+    data_factor = sys.argv[4]
 
-    assert operation in {"read","write"}
     assert dbport.find('.') < 0
     assert data_factor.find('.') < 0
     dbport = int(dbport)
@@ -34,26 +53,38 @@ if __name__ == "__main__":
      - jem
     """ * data_factor
 
+    my_id = _uuid_()
+
     mongodb = MongoClient(dbhost, dbport)
     db = mongodb[dbname]
     cl = db[dbname]
 
+    my_task = get_task(cl, my_id)
+    my_operation = my_task["operation"]
+
+    assert isinstance(my_task, dict)
+    assert operation in {"read","write"}
+
     if operation == "write":
 
-        document = {
-            "_id"   : _uuid_(),
+        task_update = {
             "data"  : thedata,
-            "state" : "final",
+            "state" : "running",
         }
 
         print("sync starting {}".format(datetime.fromtimestamp(time())))
-        cl.insert_one(document)
+
+        cl.update_one(
+            {"_id"  : my_task["_id"]},
+            {"$set": task_update},
+        )
+
         print("sync stopping {}".format(datetime.fromtimestamp(time())))
 
     elif operation == "read":
 
         print("sync starting {}".format(datetime.fromtimestamp(time())))
-        readdata = cl.find_one()
+        readdata = cl.find_one({"type":"data"})
         print("sync stopping {}".format(datetime.fromtimestamp(time())))
 
         print("going to verify at runtime...")

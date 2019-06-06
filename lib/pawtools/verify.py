@@ -106,12 +106,12 @@ def verify(args, paw_home):
         # NOTE writes are verified here and now
         for document in cl.find():
             count += 1
+            logger.info("proper len of data: %d"%len(thedata))
+            logger.info("found  len of data: %d"%len(document["data"]))
             if thedata == document["data"]:
                 correct.append(document["_id"])
             else:
                 wrong.append(document["_id"])
-                print("this data was 'wrong':")
-                print(document["data"])
 
         mongo.stop_mongodb()
         mongodb.close()
