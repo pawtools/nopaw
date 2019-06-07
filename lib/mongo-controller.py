@@ -14,10 +14,22 @@ from pymongo import MongoClient
 print("pyscript recieved args:\n{}".format(
     sys.argv))
 
+check_executor_files = lambda: '{} filelist:\n'.format(
+    datetime.fromtimestamp(time())) \
+    + '\n'.join(os.listdir('.'))
+
+check_tasks_col = lambda: cl.find_many(
+    {"state":"running"},
+    {"proj" :"operation"},
+)
+
 def runtime_check(check_func, interval=5, n_checks=0):
+    """Blocking function
+    """
+    result = ""
     for _ in n_checks:
         sleep(interval)
-        yield check_func()
+        result += check_func()
 
 
 if __name__ == "__main__":
@@ -105,10 +117,11 @@ if __name__ == "__main__":
     if to_file:
         check_interval = 2
         n_checks = 10
-        check_func = lambda: cl.find_many(
-            {"state":"running"},
-            {"proj" :"operation"},
-        runtime_check(check_interval, n_checks)
+
+        checkresult = runtime_check(check_executor_files, check_interval, n_checks)
+
+        with open("controller.result.out", "w") as f_out:
+            f_out.write(checkresult)
 
     # Done with database
     mongodb.close()
