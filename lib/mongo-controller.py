@@ -14,6 +14,12 @@ from pymongo import MongoClient
 print("pyscript recieved args:\n{}".format(
     sys.argv))
 
+def runtime_check(check_func, interval=5, n_checks=0):
+    for _ in n_checks:
+        sleep(interval)
+        yield check_func()
+
+
 if __name__ == "__main__":
 
     dbhost = sys.argv[1]
@@ -88,12 +94,21 @@ if __name__ == "__main__":
             "operation": task_operation,
             "to_file"  : to_file,
             "state"    : "created",
+            "heartbeat": 10,
             "data"     : None,
             "executor" : None,
         })
 
     print("task synch stopped {}".format(
         datetime.fromtimestamp(time())))
+
+    if to_file:
+        check_interval = 2
+        n_checks = 10
+        check_func = lambda: cl.find_many(
+            {"state":"running"},
+            {"proj" :"operation"},
+        runtime_check(check_interval, n_checks)
 
     # Done with database
     mongodb.close()
