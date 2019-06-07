@@ -3,7 +3,7 @@
 import sys
 import os
 from datetime import datetime
-from time import time
+from time import time, sleep
 from uuid import uuid1 as _uuid_
 from pymongo import MongoClient
 
@@ -14,9 +14,9 @@ from pymongo import MongoClient
 print("pyscript recieved args:\n{}".format(
     sys.argv))
 
-check_executor_files = lambda: '{} filelist:\n'.format(
+check_executor_files = lambda: '\n{} filelist:\n'.format(
     datetime.fromtimestamp(time())) \
-    + '\n'.join(os.listdir('.'))
+    + '\n'.join(os.listdir('./executors'))
 
 check_tasks_col = lambda: cl.find_many(
     {"state":"running"},
@@ -30,6 +30,8 @@ def runtime_check(check_func, interval=5, n_checks=0):
     for _ in range(n_checks):
         sleep(interval)
         result += check_func()
+
+    return result
 
 
 if __name__ == "__main__":
