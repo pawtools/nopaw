@@ -79,6 +79,10 @@ def get_parser():
         default="sessions",
         help="Change the top-level directory for workload sessions",
     )
+    workload_parser.add_argument("-i", "--interactive",
+        action="store_true",
+        help="Run a workload in interactive mode",
+    )
     workload_parser.add_argument("-d", "--db_location",
         default="mongo/",
         help="Number of minutes for workload LRMS job",

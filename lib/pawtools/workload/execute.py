@@ -76,6 +76,7 @@ def workload(args, paw_home):
     session_mover = SessionMover(session_home, session_name)
 
     allocation = user_config["allocation"]
+    interactive = "--interactive" if args.interactive else " "
 
     # TODO get from config
     cores_per_node = 42

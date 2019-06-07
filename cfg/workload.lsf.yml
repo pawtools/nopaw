@@ -50,7 +50,7 @@ workload:
     - "mongosshlaunch=\"ssh-and-launch.expect $SHPROFILE $REMOTEHOST launch_amongod $DBLOCATION $REMOTEPORT $VERBOSE\""
     - "eval $mongosshlaunch 2> nopaw.mongodb.sshlaunch.err 1> nopaw.mongodb.sshlaunch.out & MONGO_APID=$!"
     - "sleep 20"
-    - "controlmongodbcommand=\"$JSRUN_LAUNCH1 mongo-controller.py $REMOTEHOST $REMOTEPORT $DBNAME {data_factor} {n_tasks} {operation}\""
+    - "controlmongodbcommand=\"$JSRUN_LAUNCH1 mongo-controller.py $REMOTEHOST $REMOTEPORT $DBNAME {data_factor} {n_tasks} {operation} {to_file}\""
     - "echo $controlmongodbcommand"
     - "eval $controlmongodbcommand 2> nopaw.mongodb.controller.err 1> nopaw.mongodb.controller.out & PAW_APID=$!"
     - "give some time for tasks to get into the database"

@@ -4,9 +4,7 @@ import os
 import yaml
 from pprint import pformat
 from pymongo import MongoClient
-
 from .logger import get_logger
-
 from .workload.jobtools import MongoInstance
 from .workload.execute import process_data_factor
 

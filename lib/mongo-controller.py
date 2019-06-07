@@ -21,12 +21,21 @@ if __name__ == "__main__":
     dbname = sys.argv[3]
     data_factor = sys.argv[4]
 
-    if len(sys.argv) == 7:
+    if len(sys.argv) >= 7:
+
         nreplicates = sys.argv[5]
         task_operation = sys.argv[6]
+
+        if len(sys.argv) == 8:
+            # Treated as a flag
+            to_file = sys.argv[7]
+        else:
+            to_file = False
+
     else:
         nreplicates = 0
         task_operation = False
+        to_file = False
 
     assert nreplicates.find('.') < 0
     nreplicates = int(nreplicates)
@@ -51,31 +60,43 @@ if __name__ == "__main__":
         "type": "data",
     }
 
-    print("controller starting {}".format(datetime.fromtimestamp(time())))
+    print("controller starting {}".format(
+        datetime.fromtimestamp(time())))
+
     # Get connection to database
     mongodb = MongoClient(dbhost, dbport)
-    db = mongodb[dbname]
-    cl = db[dbname]
+    db      = mongodb[dbname]
+    cl      = db[dbname]
 
     # Creating data entry
-    print("data synch starting {}".format(datetime.fromtimestamp(time())))
+    print("data synch starting {}".format(
+        datetime.fromtimestamp(time())))
+
     cl.insert_one(document)
-    print("data synch stopped {}".format(datetime.fromtimestamp(time())))
+
+    print("data synch stopped {}".format(
+        datetime.fromtimestamp(time())))
 
     # Creating Task entries for executors
-    print("task synch starting {}".format(datetime.fromtimestamp(time())))
+    print("task synch starting {}".format(
+        datetime.fromtimestamp(time())))
+
     for _ in range(nreplicates):
         cl.insert_one({
             "_id"      : _uuid_(),
             "type"     : "task",
             "operation": task_operation,
+            "to_file"  : to_file,
             "state"    : "created",
             "data"     : None,
             "executor" : None,
-    })
-    print("task synch stopped {}".format(datetime.fromtimestamp(time())))
+        })
+
+    print("task synch stopped {}".format(
+        datetime.fromtimestamp(time())))
 
     # Done with database
     mongodb.close()
 
-    print("controller stopped {}".format(datetime.fromtimestamp(time())))
+    print("controller stopped {}".format(
+        datetime.fromtimestamp(time())))
