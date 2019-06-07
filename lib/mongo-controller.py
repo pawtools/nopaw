@@ -27,7 +27,7 @@ def runtime_check(check_func, interval=5, n_checks=0):
     """Blocking function
     """
     result = ""
-    for _ in n_checks:
+    for _ in range(n_checks):
         sleep(interval)
         result += check_func()
 

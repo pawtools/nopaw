@@ -86,14 +86,17 @@ def workload(args, paw_home):
     # Set all the needed options from config fields
     # Paw Runtime
     # Options commonly changed
-    if len(args.task_args) not in (1,2):
+    if len(args.task_args) not in (1,2,3):
         raise Exception("Require argument 'operation' for option '-t'/'--task_args'")
 
     else:
         operation = args.task_args[0]
 
-        if len(args.task_args) == 2:
+        if len(args.task_args) >= 2:
             data_factor = process_data_factor(args.task_args[1])
+
+        if len(args.task_args) == 3:
+            to_file = args.task_args[2]
 
     n_tasks = args.n_replicates
     job_name = args.job_name
@@ -135,6 +138,7 @@ def workload(args, paw_home):
         #Task Options
         operation        = operation,
         data_factor      = data_factor,
+        to_file          = to_file,
     )
 
     logger.debug(pformat(jobconfig))

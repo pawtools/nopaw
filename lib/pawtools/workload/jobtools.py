@@ -18,10 +18,20 @@ __all__ = [
     "JobBuilder",
 ]
 
-get_format_fields = lambda s: [
-    fname for _, fname, _, _
-    in Formatter().parse(s) if fname
-]
+#get_format_fields = lambda s: [
+#    fname for _, fname, _, _
+#    in Formatter().parse(s) if fname
+#]
+
+def get_format_fields(s):
+    fields = list()
+
+    for result in Formatter().parse(s):
+
+        if result[1]:
+            fields.append(result[1])
+
+    return fields
 
 cli_args_from_dict = lambda d: ' '.join(
     [' '.join([str(k),str(v)])
@@ -432,12 +442,16 @@ class JobBuilder(object):
         flatconfig = flatten_list(flatten_dict(
             self.job_configuration))
 
-        self._keys = {
-            k[0]:None for k in
-            [get_format_fields(fc) for fc
-             in flatconfig if isinstance(fc, str)
-            ] if k
+        format_fields = [
+            k for fc in flatconfig if isinstance(fc, str) 
+            for k in get_format_fields(fc)
+        ]
+
+        newkeys = {
+            k:None for k in format_fields
         }
+
+        self._keys.update(newkeys)
 
     def _write_script(self):
         '''Write a script to submit a job

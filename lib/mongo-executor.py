@@ -68,7 +68,7 @@ if __name__ == "__main__":
         to_file = my_task["to_file"]
 
         if to_file:
-            my_datafile = "executor.%s.data.out" % my_id
+            my_datafile = "executors/executor.%s.data.out" % my_id
 
         else:
             thedata *= data_factor
