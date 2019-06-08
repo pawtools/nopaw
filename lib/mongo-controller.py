@@ -2,11 +2,17 @@
 
 import sys
 import os
+import subprocess
 from datetime import datetime
 from time import time, sleep
 from uuid import uuid1 as _uuid_
 from pymongo import MongoClient
 
+
+def check_directory_contents(directory="executors"):
+    process = subprocess.Popen(['ls', '-grt', directory], stdout=subprocess.PIPE)
+    out, err = process.communicate()
+    return out, err
 
 # FIXME paw "scripts" should import from pawtools!
 #from pawtools import get_logger
@@ -14,21 +20,26 @@ from pymongo import MongoClient
 print("pyscript recieved args:\n{}".format(
     sys.argv))
 
-check_executor_files = lambda: '\n{} filelist:\n'.format(
+check_executor_files = lambda : '\n{} filelist:\n'.format(
     datetime.fromtimestamp(time())) \
-    + '\n'.join(os.listdir('./executors'))
+    + '\n'.join([str(c, 'utf-8') for c in check_directory_contents() if c is not None])
 
 check_tasks_col = lambda: cl.find_many(
     {"state":"running"},
     {"proj" :"operation"},
 )
 
-def runtime_check(check_func, interval=5, n_checks=0):
+def runtime_check(check_func, interval=5, n_checks=0, f_out=None):
     """Blocking function
     """
     result = ""
     for _ in range(n_checks):
         sleep(interval)
+        if f_out:
+            print("writing to file")
+            f_out.write(check_func())
+            f_out.flush()
+
         result += check_func()
 
     return result
@@ -116,13 +127,21 @@ if __name__ == "__main__":
     print("task synch stopped {}".format(
         datetime.fromtimestamp(time())))
 
-    if to_file:
+    if to_file or task_operation == "hello":
         check_interval = 2
-        n_checks = 10
+        n_checks = 50
 
-        checkresult = runtime_check(check_executor_files, check_interval, n_checks)
+        f_out = open("controller.result.out", "w")
 
-        with open("controller.result.out", "w") as f_out:
+        checkresult = runtime_check(
+            check_executor_files,
+            check_interval,
+            n_checks,
+            f_out,
+        )
+        f_out.close()
+
+        with open("controller.result.duplicate.out", "w") as f_out:
             f_out.write(checkresult)
 
     # Done with database

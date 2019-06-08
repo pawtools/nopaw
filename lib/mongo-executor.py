@@ -2,6 +2,7 @@
 
 import sys
 import os
+import subprocess
 from uuid import uuid1 as _uuid_
 from time import time, sleep
 from datetime import datetime
@@ -64,17 +65,13 @@ if __name__ == "__main__":
     my_operation = my_task["operation"]
 
     # NOTE!! Different to_file Activity for reads vs writes
-    if my_operation in ["read","write"]:
-        to_file = my_task["to_file"]
+    to_file = my_task["to_file"]
 
-        if to_file:
-            my_datafile = "executors/executor.%s.data.out" % my_id
+    if to_file or my_operation == "hello":
+        my_datafile = "executors/executor.%s.data.out" % my_id
 
-        else:
-            thedata *= data_factor
-
-    assert isinstance(my_task, dict)
-    assert my_operation in {"read","write"}
+    else:
+        thedata *= data_factor
 
     task_running_update = {"state":"running"}
     task_success_update = {"state":"success"}
@@ -95,6 +92,7 @@ if __name__ == "__main__":
 
             for _ in range(data_factor):
                 f_out.write(thedata)
+                f_out.flush()
                 sleep(sleeptime)
 
             f_out.close()
@@ -105,6 +103,20 @@ if __name__ == "__main__":
                 {"$set": {"data":thedata}},
             )
             sleep(60)
+
+        print("sync stopping {}".format(
+            datetime.fromtimestamp(time())))
+
+    elif my_operation == "hello":
+
+        print("sync starting {}".format(
+            datetime.fromtimestamp(time())))
+
+        sleeptime = 60./data_factor
+
+        for _ in range(data_factor):
+            subprocess.call(["hello_jem", my_datafile])
+            sleep(sleeptime)
 
         print("sync stopping {}".format(
             datetime.fromtimestamp(time())))
@@ -127,6 +139,7 @@ if __name__ == "__main__":
 
             for _ in range(data_factor):
                 f_out.write(readdata["data"])
+                f_out.flush()
                 sleep(sleeptime)
 
             f_out.close()
@@ -143,7 +156,7 @@ if __name__ == "__main__":
                 (len(thedata), len(readdata['data'])))
 
     cl.update_one(
-        {"_id"  : my_task["_id"]},
+        {"_id" : my_task["_id"]},
         {"$set": task_success_update},
     )
 

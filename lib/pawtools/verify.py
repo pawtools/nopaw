@@ -29,15 +29,19 @@ def verify(args, paw_home):
     # Paw Runtime
     # Options commonly changed
     data_factor = 1
+    to_file = False
     if not isinstance(args.task_args, list):
         raise Exception("Option '-t'/'--task_args' must be given")
-    elif len(args.task_args) not in (1,2):
+    elif len(args.task_args) not in (1,2,3):
         raise Exception("Require argument 'operation' for option '-t'/'--task_args'")
     else:
         operation = args.task_args[0]
 
-        if len(args.task_args) == 2:
+        if len(args.task_args) >= 2:
             data_factor = process_data_factor(args.task_args[1])
+
+        if len(args.task_args) == 3:
+            to_file = args.task_args[2]
 
     session_directory = args.session_directory
     nreplicates = args.n_replicates
@@ -50,6 +54,7 @@ def verify(args, paw_home):
     verified = os.path.join(session_directory, "verified.true")
     notverified = os.path.join(session_directory, "verified.false")
     verify_filename = os.path.join(session_directory, "verify-data.pyd")
+    executors_prefix = os.path.join(session_directory, "executors")
 
     thedata = """Jem says hello
     Jem says hi
@@ -73,7 +78,6 @@ def verify(args, paw_home):
         #        allow later verification without adding
         #        additional task operations
         verified_message = "Data was verified"
-        executors_prefix = os.path.join(session_directory, 'executors')
         executor_filename = "nopaw.executor."
         executors = map(
             lambda ffnm: os.path.join(executors_prefix, ffnm),
@@ -104,12 +108,28 @@ def verify(args, paw_home):
         # NOTE writes are verified here and now
         for document in cl.find({"type":"task"}):
             count += 1
-            logger.info("proper len of data: %d"%len(thedata))
-            logger.info("found  len of data: %d"%len(document["data"]))
-            if thedata == document["data"]:
-                correct.append(document["_id"])
+            executor_id = document["executor"]
+
+            logger.info("proper len of data: %d" % len(thedata))
+
+            if to_file:
+                executor_datafile = os.path.join(
+                    executors_prefix,
+                    "executor.%s.data.out" % executor_id
+                )
+
+                with open(executor_datafile, "r") as f:
+                    readdata = f.read()
+
             else:
-                wrong.append(document["_id"])
+                readdata = document["data"]
+
+            if thedata == readdata:
+                correct.append(executor_id)
+            else:
+                wrong.append(executor_id)
+
+            logger.info("found  len of data: %d" % len(readdata))
 
         mongo.stop_mongodb()
         mongodb.close()

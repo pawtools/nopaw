@@ -82,6 +82,7 @@ def workload(args, paw_home):
     cores_per_node = 42
     gpu_per_node = 6
     data_factor = 1
+    to_file = " "
 
     # Set all the needed options from config fields
     # Paw Runtime
@@ -103,13 +104,14 @@ def workload(args, paw_home):
     minutes = args.n_minutes
     # FIXME database/environment model not good
     n_mongo_nodes = 1
+    n_controller_nodes = 1
     db_location = args.db_location
     # TODO add these to options commonly changed config
     mpi_per_task = 1
     #gpu_per_task = 0
     threads_per_task = 1
     threads_per_rank = 1
-    n_nodes = int(args.n_replicates)//int(cores_per_node) + bool(int(args.n_replicates)%int(cores_per_node)) + int(n_mongo_nodes)
+    n_nodes = int(args.n_replicates)//int(cores_per_node) + bool(int(args.n_replicates)%int(cores_per_node)) + n_mongo_nodes + n_controller_nodes
 
     # Task here is like "MD task" of whatever
     # is assigned to a single MD instance.
