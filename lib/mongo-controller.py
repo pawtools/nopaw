@@ -14,35 +14,42 @@ def check_directory_contents(directory="executors"):
     out, err = process.communicate()
     return out, err
 
+
 # FIXME paw "scripts" should import from pawtools!
 #from pawtools import get_logger
 
 print("pyscript recieved args:\n{}".format(
     sys.argv))
 
+def check_executors_alive(collection, heartbeat=10, wait_beats=3, f_out=None):
+
+    def _check_executors_alive(collection, heartbeat, f_out):
+        tasks = collection.find_many({"type":"task"}, projection=["state","executor","signal","lastseen"])
+        now   = time()
+
+        if f_out:
+            f_out.write('%s\n' % datetime.fromtimestamp(now))
+            f_out.write('%s\n' % pformat(tasks))
+            f_out.flush()
+
+        yield all([now - ta["lastseen"] < wait_beats * heartbeat for ta in tasks])
+
+    return lambda: _check_executors_alive(collection, heartbeat, f_out)
+
+
 check_executor_files = lambda : '\n{} filelist:\n'.format(
     datetime.fromtimestamp(time())) \
     + '\n'.join([str(c, 'utf-8') for c in check_directory_contents() if c is not None])
 
-check_tasks_col = lambda: cl.find_many(
-    {"state":"running"},
-    {"proj" :"operation"},
-)
 
-def runtime_check(check_func, interval=5, n_checks=0, f_out=None):
+def runtime_check(check_func, interval=5, n_checks=None):
     """Blocking function
     """
-    result = ""
-    for _ in range(n_checks):
+    if n_checks:
+        raise NotImplementedError
+
+    while check_func():
         sleep(interval)
-        if f_out:
-            print("writing to file")
-            f_out.write(check_func())
-            f_out.flush()
-
-        result += check_func()
-
-    return result
 
 
 if __name__ == "__main__":
@@ -51,6 +58,7 @@ if __name__ == "__main__":
     dbport = sys.argv[2]
     dbname = sys.argv[3]
     data_factor = sys.argv[4]
+    heartbeat = 10
 
     if len(sys.argv) >= 7:
 
@@ -119,7 +127,9 @@ if __name__ == "__main__":
             "operation": task_operation,
             "to_file"  : to_file,
             "state"    : "created",
-            "heartbeat": 10,
+            "heartbeat": heartbeat,
+            "lastseen" : 0,
+            "signal"   : None,
             "data"     : None,
             "executor" : None,
         })
@@ -128,21 +138,13 @@ if __name__ == "__main__":
         datetime.fromtimestamp(time())))
 
     if to_file or task_operation == "hello":
-        check_interval = 2
-        n_checks = 50
-
         f_out = open("controller.result.out", "w")
 
-        checkresult = runtime_check(
-            check_executor_files,
-            check_interval,
-            n_checks,
-            f_out,
+        runtime_check(
+            check_executors_alive(cl, heartbeat, f_out),
+            heartbeat,
         )
         f_out.close()
-
-        with open("controller.result.duplicate.out", "w") as f_out:
-            f_out.write(checkresult)
 
     # Done with database
     mongodb.close()

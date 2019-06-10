@@ -7,7 +7,17 @@ from uuid import uuid1 as _uuid_
 from time import time, sleep
 from datetime import datetime
 from pymongo import MongoClient, ReturnDocument
+from multiprocessing import Process
 
+
+def hello_function(my_datafile, data_factor=60):
+    '''This runs in background via multiprocessing.Process
+    '''
+    sleeptime = 60./data_factor
+
+    for _ in range(data_factor):
+        subprocess.call(["hello_jem", my_datafile])
+        sleep(sleeptime)
 
 
 def get_task(collection, finder_id):
@@ -112,12 +122,22 @@ if __name__ == "__main__":
         print("sync starting {}".format(
             datetime.fromtimestamp(time())))
 
-        sleeptime = 60./data_factor
+        my_task_filter = {"_id"  : my_task["_id"], "type":"task"}
+        my_heartbeat = my_task["heartbeat"]
+        p = Process(target=hello_function, args=(my_datafile, data_factor))
+        p.start()
+        while p.is_alive():
+            sleep(my_heartbeat)
+            signal = cl.find_one_and_update(
+                my_task_filter,
+                {"$set": {"lastseen":time()}},
+                projection=["signal"],
+                return_document=ReturnDocument.AFTER,
+            )
+            if signal["signal"]:
+                print("I got signal: %s" % signal["signal"])
 
-        for _ in range(data_factor):
-            subprocess.call(["hello_jem", my_datafile])
-            sleep(sleeptime)
-
+        p.join()
         print("sync stopping {}".format(
             datetime.fromtimestamp(time())))
 
