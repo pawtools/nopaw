@@ -3,6 +3,7 @@
 import sys
 import os
 import subprocess
+from pprint import pformat
 from datetime import datetime
 from time import time, sleep
 from uuid import uuid1 as _uuid_
@@ -19,22 +20,49 @@ def check_directory_contents(directory="executors"):
 #from pawtools import get_logger
 
 print("pyscript recieved args:\n{}".format(
-    sys.argv))
+    sys.argv), flush=True)
 
-def check_executors_alive(collection, heartbeat=10, wait_beats=3, f_out=None):
+do_signal = 0
 
-    def _check_executors_alive(collection, heartbeat, f_out):
-        tasks = collection.find_many({"type":"task"}, projection=["state","executor","signal","lastseen"])
-        now   = time()
+def check_executors_alive(collection, heartbeat=10, f_out=None, wait_beats=3):
+
+    print("check function arguments: ", flush=True)
+    print(collection, heartbeat, wait_beats, f_out, flush=True)
+
+    waitstart = 35
+    timestart = time()
+
+    def _check_executors_alive(collection, heartbeat, f_out, waitstart, timestart):
+        now   = int(time())
+        print("Performing a check now %s" % datetime.fromtimestamp(now), flush=True)
+        tasks = [ta for ta in collection.find({"type":"task"}, projection=["state","executor","signal","lastseen"])]
 
         if f_out:
             f_out.write('%s\n' % datetime.fromtimestamp(now))
             f_out.write('%s\n' % pformat(tasks))
             f_out.flush()
 
-        yield all([now - ta["lastseen"] < wait_beats * heartbeat for ta in tasks])
+        if do_signal:
+            if now - timestart > 40 and now - timestart < 40 + heartbeat + 1:
+                print("Emitting Signal", flush=True)
+                #collection.update_many({"type":"task"}, {"$set":{"signal":"pause 15"}})
+                collection.update_many({"type":"task"}, {"$set":{"signal":"restart"}})
+                do_signal -= 1
 
-    return lambda: _check_executors_alive(collection, heartbeat, f_out)
+        #print(pformat(tasks), flush=True)
+        #print([now - ta["lastseen"] for ta in tasks], flush=True)
+        #print([now - ta["lastseen"] < wait_beats * heartbeat for ta in tasks], flush=True)
+        #print([ta["state"] == "created" for ta in tasks], flush=True)
+        return any([
+            (
+             ((   now - timestart      < waitstart             ) and (ta["state"] == "created"))
+             or ((now - ta["lastseen"] < wait_beats * heartbeat) and (ta["state"] == "running"))
+             or ((now - ta["lastseen"] < wait_beats * heartbeat) and (ta["state"] == "success"))
+            )
+            for ta in tasks
+        ])
+
+    return lambda: _check_executors_alive(collection, heartbeat, f_out, waitstart, timestart)
 
 
 check_executor_files = lambda : '\n{} filelist:\n'.format(
@@ -45,6 +73,8 @@ check_executor_files = lambda : '\n{} filelist:\n'.format(
 def runtime_check(check_func, interval=5, n_checks=None):
     """Blocking function
     """
+    print("Runtime checks will be done with this function", flush=True)
+    print(check_func, flush=True)
     if n_checks:
         raise NotImplementedError
 
@@ -58,7 +88,7 @@ if __name__ == "__main__":
     dbport = sys.argv[2]
     dbname = sys.argv[3]
     data_factor = sys.argv[4]
-    heartbeat = 10
+    heartbeat = 5
 
     if len(sys.argv) >= 7:
 
@@ -100,7 +130,7 @@ if __name__ == "__main__":
     }
 
     print("controller starting {}".format(
-        datetime.fromtimestamp(time())))
+        datetime.fromtimestamp(time())), flush=True)
 
     # Get connection to database
     mongodb = MongoClient(dbhost, dbport)
@@ -109,16 +139,16 @@ if __name__ == "__main__":
 
     # Creating data entry
     print("data synch starting {}".format(
-        datetime.fromtimestamp(time())))
+        datetime.fromtimestamp(time())), flush=True)
 
     cl.insert_one(document)
 
     print("data synch stopped {}".format(
-        datetime.fromtimestamp(time())))
+        datetime.fromtimestamp(time())), flush=True)
 
     # Creating Task entries for executors
     print("task synch starting {}".format(
-        datetime.fromtimestamp(time())))
+        datetime.fromtimestamp(time())), flush=True)
 
     for _ in range(nreplicates):
         cl.insert_one({
@@ -135,7 +165,7 @@ if __name__ == "__main__":
         })
 
     print("task synch stopped {}".format(
-        datetime.fromtimestamp(time())))
+        datetime.fromtimestamp(time())), flush=True)
 
     if to_file or task_operation == "hello":
         f_out = open("controller.result.out", "w")
@@ -150,4 +180,4 @@ if __name__ == "__main__":
     mongodb.close()
 
     print("controller stopped {}".format(
-        datetime.fromtimestamp(time())))
+        datetime.fromtimestamp(time())), flush=True)

@@ -7,10 +7,10 @@ from uuid import uuid1 as _uuid_
 from time import time, sleep
 from datetime import datetime
 from pymongo import MongoClient, ReturnDocument
-from multiprocessing import Process
+from multiprocessing import Process, Value
 
 
-def hello_function(my_datafile, data_factor=60):
+def hello_function(my_datafile, data_factor=60, single_pause_time=0):
     '''This runs in background via multiprocessing.Process
     '''
     sleeptime = 60./data_factor
@@ -18,6 +18,12 @@ def hello_function(my_datafile, data_factor=60):
     for _ in range(data_factor):
         subprocess.call(["hello_jem", my_datafile])
         sleep(sleeptime)
+
+        # The SIGNAL is here
+        if single_pause_time.value:
+            print("HELLO got signal, sleeping for {}".format(single_pause_time.value), flush=True)
+            sleep(single_pause_time.value)
+            single_pause_time.value -= single_pause_time.value
 
 
 def get_task(collection, finder_id):
@@ -83,7 +89,7 @@ if __name__ == "__main__":
     else:
         thedata *= data_factor
 
-    task_running_update = {"state":"running"}
+    task_running_update = {"state":"running", "lastseen":int(time())}
     task_success_update = {"state":"success"}
 
     cl.update_one(
@@ -124,18 +130,37 @@ if __name__ == "__main__":
 
         my_task_filter = {"_id"  : my_task["_id"], "type":"task"}
         my_heartbeat = my_task["heartbeat"]
-        p = Process(target=hello_function, args=(my_datafile, data_factor))
+        single_pause_time = Value("i", 0)
+        p = Process(target=hello_function, args=(my_datafile, data_factor, single_pause_time))
         p.start()
         while p.is_alive():
             sleep(my_heartbeat)
             signal = cl.find_one_and_update(
                 my_task_filter,
-                {"$set": {"lastseen":time()}},
-                projection=["signal"],
+                {"$set": {"lastseen": int(time())}},
+                projection=["signal","lastseen"],
                 return_document=ReturnDocument.AFTER,
             )
+            print("lastseen: %s, signal: %s" % (signal["lastseen"], signal["signal"]))
+
             if signal["signal"]:
                 print("I got signal: %s" % signal["signal"])
+                if signal["signal"].lower().startswith("pause"):
+                    pausetime = int(signal["signal"].split()[1])
+                    single_pause_time.value += pausetime
+
+                if signal["signal"].lower().startswith("restart"):
+                    print("sync stopping {}".format(
+                        datetime.fromtimestamp(time())))
+                    p.terminate()
+                    p.join()
+                    my_datafile_2 = "executors/executor.2.%s.data.out" % my_id
+                    print("sync starting {}".format(
+                        datetime.fromtimestamp(time())))
+                    p = Process(target=hello_function, args=(my_datafile_2, data_factor, single_pause_time))
+                    p.start()
+
+                cl.update_one(my_task_filter, {"$set":{"signal":None}})
 
         p.join()
         print("sync stopping {}".format(

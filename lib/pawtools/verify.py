@@ -109,6 +109,7 @@ def verify(args, paw_home):
         for document in cl.find({"type":"task"}):
             count += 1
             executor_id = document["executor"]
+            task_id = document["_id"]
 
             logger.info("proper len of data: %d" % len(thedata))
 

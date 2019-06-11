@@ -156,13 +156,16 @@ def analyze(args, paw_home):
     interval_timestamp_keys['taskpre']  = taskpre  = [taskTaskStart, taskMainStart]
     interval_timestamp_keys['taskpost'] = taskpost = [taskMainStop, taskTaskStop]
     interval_timestamp_keys['taskend']  = taskpost = [taskTaskStop, taskConnStop]
+
     interval_plotlabel_keys = dict()
     interval_plotlabel_keys['workload'] = "Wtotal"
-    interval_plotlabel_keys['taskinit'] = "Einit"
-    interval_plotlabel_keys['taskstop'] = "Eclose"
-    interval_plotlabel_keys['taskmain'] = "Tmain"
     interval_plotlabel_keys['tasktask'] = "Ttotal"
     interval_plotlabel_keys['taskconn'] = "Elive"
+    interval_plotlabel_keys['taskmain'] = "Tmain"
+
+    interval_plotlabel_keys['taskinit'] = "Einit"
+    interval_plotlabel_keys['taskstop'] = "Eclose"
+
     interval_plotlabel_keys['taskboot'] = "Tboot"
     interval_plotlabel_keys['taskpre']  = "Tpre"
     interval_plotlabel_keys['taskpost'] = "Tpost"
