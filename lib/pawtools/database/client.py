@@ -109,8 +109,10 @@ class PawClient:
         cl.update_one(query, update)
 
     def get_task(self):
+        from pymongo import ReadConcern
         mongodb = self.open_client
-        db = mongodb[self.dbname]
+        #db = mongodb[self.dbname]
+        db = get_database(name=self.dbname, read_concern=ReadConcern("linearizable")
         cl = db[self.dbname]
         task = cl.find_one()
         self.update_status(task, "started")
