@@ -30,6 +30,8 @@ class PawTask:
         self.cached_data = dict()
     def __getitem__(self, key):
         return self.parent.read_data(self.task["meta_data"][key])
+    def update_status(self, status):
+        self.parent.update_status(status)
     
 
 class PawClient:
@@ -88,6 +90,7 @@ class PawClient:
         document = {
             "_id" : _uuid_(),
             "meta_data": meta_data,
+            "status": "not started"
         }
 
         mongodb = self.open_client
@@ -96,11 +99,21 @@ class PawClient:
         cl = db[self.dbname]
         cl.insert_one(document)
 
+    def update_status(task, new_string):
+        query = {"_id":task["_id"]}
+        update = {"status": str(new_string)}
+        mongodb = self.open_client
+
+        db = mongodb[self.dbname]
+        cl = db[self.dbname]
+        cl.update_one(query, update)
+
     def get_task(self):
         mongodb = self.open_client
         db = mongodb[self.dbname]
         cl = db[self.dbname]
         task = cl.find_one()
+        self.update_status(task, "started")
         return PawTask(self,task)
 
     #Try hitting the database with a cheap operation to see if it is there. Mostly for testing and debugging
